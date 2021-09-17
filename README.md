@@ -1,6 +1,6 @@
 ## Beats !||!
 
-Thats a music player that run on any envirnoment unless it supports bash.
+Thats a music player which run on any envirnoment unless it supports bash.
 <br>
 ### Usage
 ./beats <file_name> | Here file_name includes its extension too.
