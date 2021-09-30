@@ -1,5 +1,5 @@
-## Beats !||!
-<br> A console based music player!
+### Beats !||!
+A console based music player!
 <br>
 
 ### How to Run?
