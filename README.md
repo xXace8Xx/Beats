@@ -21,7 +21,7 @@ A console based music player!
 ENJOY
 
 ### Note
-I dont want to call it beta verson, but there are still alot of things that i need to work on: <br>
+Thats a kinda short of limits to this tool and will suerly repair them in future! <br>
 
 1) It need `ffmpeg` to run(depedency). It will automatically download, if not already installed (work only with ubuntu based systems).
 2) Only support mp3 format yet!
