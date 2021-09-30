@@ -1,12 +1,27 @@
 ## Beats !||!
-
 A console based music player!
 <br>
-<br><br> 
-Remember file_name shouldn't contain whitespace, eg: if the file_name is "Make you mine.mp3" then rmove its spaces and reexecute. <br> and also you should have to execute file from the same directory, where the tool is present eg: if you are executing it like this "./Downloads/beats music.mp3" then it may not work so you have to cd to same directory and then execute it.
+
+### How to Run?
+<b>By Terminal</b>
+1) Open terminal!
+2) `cd` to the tool.
+3) Type `chmod +x beats` to give executable permissions.
+4) Now type `./beats` to run it.
+<br>
+<b>By GUI</b>
+1) Open any file manager!
+2) open file's location.
+3) Right click on it and open its properties.
+4) Give it all executable permissions.
+5) now close permission tab and double click on file.
+6) select run.
+
+<br>
+ENJOY
 
 ### Note
-I dont want to call it beta verson but there are still alot of thins i need to work on: <br><br>
+I dont want to call it beta verson, but there are still alot of things that i need to work on: <br><br>
 
-It need `ffmpeg` to run(depedency), It will automatically download, if not already installed (work only with ubuntu based systems).
+It need `ffmpeg` to run(depedency). It will automatically download, if not already installed (work only with ubuntu based systems).
 Only support mp3 format yet!
