@@ -8,7 +8,6 @@ A console based music player!
 2) `cd` to the tool.
 3) Type `chmod +x beats` to give it all executable permissions.
 4) Now type `./beats` to run .
-<br>
 
 <b>By GUI</b>
 
