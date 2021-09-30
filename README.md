@@ -1,7 +1,7 @@
 ## Beats !||!
 A console based music player!
-<br>
 
+<br>
 ### How to Run?
 <b>By Terminal</b>
 1) Open terminal!
@@ -22,7 +22,7 @@ A console based music player!
 ENJOY
 
 ### Note
-I dont want to call it beta verson, but there are still alot of things that i need to work on: <br><br>
+I dont want to call it beta verson, but there are still alot of things that i need to work on: <br>
 
 It need `ffmpeg` to run(depedency). It will automatically download, if not already installed (work only with ubuntu based systems).
 Only support mp3 format yet!
