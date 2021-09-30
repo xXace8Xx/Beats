@@ -6,8 +6,8 @@ A console based music player!
 <b>By Terminal</b>
 1) Open terminal!
 2) `cd` to the tool.
-3) Type `chmod +x beats` to give executable permissions.
-4) Now type `./beats` to run it.
+3) Type `chmod +x beats` to give it all executable permissions.
+4) Now type `./beats` to run .
 <br>
 
 <b>By GUI</b>
@@ -19,7 +19,6 @@ A console based music player!
 5) now close permission tab and double click on file.
 6) select run.
 
-<br>
 ENJOY
 
 ### Note
