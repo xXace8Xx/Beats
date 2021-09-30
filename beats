@@ -1,0 +1,224 @@
+#! /bin/bash
+
+
+
+Version=3.0
+cd
+pwd=$PWD
+
+Red='\033[0;31m'
+Blue='\033[0;34m'
+Purple='\033[0;35m'
+Noc='\033[0m'
+BO='\033[0;33m'
+
+# simple note while playing music
+note1() {
+	title
+	echo
+	printf "${BO}Type CTRL+c to exit\n"
+}
+# animation while playing music
+animation() {
+	chars="\|/-"
+	while :; do
+  	for (( i=0; i<${#chars}; i++ )); do
+	    sleep 0.1
+	    echo -en "${chars:$i:1}" "\r""${BO}Playing Beat from $pwd2...${Noc}"
+	done
+	done
+}
+# top title(beats!||!)
+title() {
+	printf "${Red}Beats !||!${Noc}\n"
+}
+# cd to the files directory
+workarea() {
+	cd $(dirname $b\ $c)
+	cd $(dirname $b\ $c\ $d)
+	cd $(dirname $b\ $c\ $d\ $e)
+	cd $(dirname $b\ $c\ $d\ $e\ $f)
+	cd $(dirname $b\ $c\ $d\ $e\ $f\ $g)
+	cd $(dirname $b\ $c\ $d\ $e\ $f\ $g\ $h)
+	cd $(dirname $b\ $c\ $d\ $e\ $f\ $g\ $i)
+	cd $(dirname $b\ $c\ $d\ $e\ $f\ $g\ $i\ $j)
+	cd $(dirname $b\ $c\ $d\ $e\ $f\ $g\ $i\ $j\ $k)
+}
+# cheks for beats availabe inside PWD after playing a music 
+beatnearby() {
+	workarea
+	clear
+	title
+	printf "${BO}More beats inside $pwd2... ${Noc} \n"
+	echo
+	ls *.mp3 -c --color -N -X -1
+	echo
+}
+# Music playing system
+playbeats() {
+	if [[ -e $b ]]
+then
+	note1
+	ffplay -nodisp >/dev/null 2>&1 $b | animation
+	beatnearby
+elif [[ -e $b\ $c ]]
+then
+	note1
+	ffplay -nodisp >/dev/null 2>&1 $b\ $c | animation
+	beatnearby
+elif [[ -e $b\ $c\ $d ]]
+then
+	note1
+	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d | animation
+	beatnearby
+elif [[ -e $b\ $c\ $d\ $e ]]
+then
+	note1
+	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d\ $e | animation
+	beatnearby
+elif [[ -e $b\ $c\ $d\ $e\ $f ]]
+then
+	note1
+	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d\ $e\ $f | animation
+	beatnearby
+elif [[ -e $b\ $c\ $d\ $e\ $f\ $g ]]
+then
+	note1
+	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d\ $e\ $f\ $g | animation
+	beatnearby
+elif [[ -e $b\ $c\ $d\ $e\ $f\ $g\ $h ]]
+then
+	note1
+	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d\ $e\ $f\ $g\ $h | animation
+	beatnearby
+elif [[ -e $b\ $c\ $d\ $e\ $f\ $g\ $h\ $i ]]
+then
+	note1
+	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d\ $e\ $f\ $g\ $h\ $i | animation
+	beatnearby
+elif [[ -e $b\ $c\ $d\ $e\ $f\ $g\ $h\ $i\ $j ]]
+then
+	note1
+	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d\ $e\ $f\ $g\ $h\ $i\ $j | animation
+	beatnearby
+elif [[ -e $b\ $c\ $d\ $e\ $f\ $g\ $h\ $i\ $j\ $k ]]
+then
+	note1
+	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d\ $e\ $f\ $g\ $h\ $i\ $j\ $k | animation
+	beatnearby
+else
+	echo Opps! file not found.
+	echo
+fi
+}
+
+# cheks if dependency exist or not
+if [[ -e /bin/ffplay ]]
+then
+	Dependency="Exist"
+else
+	title
+	printf "${BO}Dependency=Not_Exist $Noc \n"
+	echo
+	echo "You need to install dependency before running this tool,"
+	echo "we can even install it right now! do want to install?"
+	echo "Type \"y\" to install or \"n\" to cancle."
+	read yn
+	if [[ $yn = y ]] || [[ $yn = Y ]]
+	then
+		sudo apt install ffmpeg
+	else
+		clear
+		title
+		echo
+		echo "Ok, as you wish..."
+		echo
+		echo "you an always install it by typing \"sudo apt install ffmpeg\""
+		echo
+		exit
+		break
+	fi
+fi
+
+# Main page!
+clear
+title
+echo
+printf "${Blue}Version = $Version \n"
+printf "Dependency = $Dependency \n"
+printf "Present directory = $pwd ${Noc}\n" 
+echo
+echo
+cd Music
+echo "Beats availabe in music directory:"
+echo
+ls *.mp3 -c --color -N -X -1
+echo
+cd
+printf "${Purple}Beat name:${Noc} "
+read b c d e f g h i j k
+clear
+
+#
+
+
+if [[ -e Music/$b ]]
+	then
+	cd Music
+	pwd2=$PWD
+	playbeats
+elif [[ -e Music/$b\ $c ]]
+	then
+	cd Music
+	pwd2=$PWD
+	playbeats
+elif [[ -e Music/$b\ $c\ $d ]]
+	then
+	cd Music
+	pwd2=$PWD
+	playbeats
+elif [[ -e Music/$b\ $c\ $d\ $e ]]
+	then
+	cd Music
+	pwd2=$PWD
+	playbeats
+elif [[ -e Music/$b\ $c\ $d\ $e\ $f ]]
+	then
+	cd Music
+	pwd2=$PWD
+	playbeats
+elif [[ -e Music/$b\ $c\ $d\ $e\ $f\ $g ]]
+	then
+	cd Music
+	pwd2=$PWD
+	playbeats
+elif [[ -e Music/$b\ $c\ $d\ $e\ $f\ $g\ $h ]]
+	then
+	cd Music
+	pwd2=$PWD
+	playbeats
+elif [[ -e Music/$b\ $c\ $d\ $e\ $f\ $g\ $h\ $i ]]
+	then
+	cd Music
+	pwd2=$PWD
+	playbeats
+elif [[ -e Music/$b\ $c\ $d\ $e\ $f\ $g\ $h\ $i\ $j ]]
+	then
+	cd Music
+	pwd2=$PWD
+	playbeats
+elif [[ -e Music/$b\ $c\ $d\ $e\ $f\ $g\ $h\ $i\ $j\ $k ]]
+	then
+	cd Music
+	pwd2=$PWD
+	playbeats
+
+
+else
+	workarea
+	pwd2=$PWD
+	clear
+	cd
+	playbeats
+fi
+
