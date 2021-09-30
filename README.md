@@ -9,7 +9,9 @@ A console based music player!
 3) Type `chmod +x beats` to give executable permissions.
 4) Now type `./beats` to run it.
 <br>
+
 <b>By GUI</b>
+
 1) Open any file manager!
 2) open file's location.
 3) Right click on it and open its properties.
