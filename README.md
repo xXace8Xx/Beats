@@ -10,7 +10,7 @@ A konsole based music player!
 ``` 
 -a -- About
 -h -- Help
--b "music" -- Play directly 
+-b -- Play it directly 
 ```
 
 ### How to Install?
