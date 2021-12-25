@@ -30,7 +30,9 @@ A bash based music player!
 3) Type `chmod +x beats` to give it all executable permissions.
 4) Now type `./beats` to run.<br>
 
-
+## TODO
+- Add ffplay suport
+- make it look more modern
 ## License
 Beats is distributed under GPLv3 license. See LICENSE file.
 
