@@ -31,8 +31,9 @@ A bash based music player!
 4) Now type `./beats` to run.<br>
 
 
+## License
+Beats is distributed under GPLv2 license. See LICENSE file.
 
 ENJOY
-
 
 #### Thx for downloading
