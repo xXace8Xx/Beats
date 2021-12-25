@@ -15,9 +15,9 @@ A bash based music player!
 ```
 ## Preview
 <b>Main page</b>
-<img src="https://github.com/Randomguy-8/Beats/blob/main/beatsimg1.png">
+<img src="https://github.com/Randomguy-8/Beats/blob/main/src/beatsimg1.png">
 <b>Playing</b>
-<img src="https://github.com/Randomguy-8/Beats/blob/main/beats.gif">
+<img src="https://github.com/Randomguy-8/Beats/blob/main/src/beats.gif">
 <br>
 ## Installation
 <b>Through Terminal</b>
