@@ -14,13 +14,15 @@ A bash based music player!
 -b -- Play it directly 
 ```
 <br>
-## Preview
 
+## Preview
+<br>
 <b>Main page!</b><br>
 <img src="https://github.com/Randomguy-8/Beats/blob/main/src/beatsimg1.png"><br>
-<b>Color changing Playing page!</b><br>
+<b>Color changes every time you play different beat!</b><br>
 <img src="https://github.com/Randomguy-8/Beats/blob/main/src/beats.gif">
 <br><br>
+
 ## Installation
 <b>Through Terminal</b>
 1) Open terminal!
