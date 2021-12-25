@@ -15,9 +15,10 @@ A bash based music player!
 ```
 <br>
 ## Preview
-<b>Main page</b><br>
+
+<b>Main page!</b><br>
 <img src="https://github.com/Randomguy-8/Beats/blob/main/src/beatsimg1.png"><br>
-<b>Playing</b><br>
+<b>Color changing Playing page!</b><br>
 <img src="https://github.com/Randomguy-8/Beats/blob/main/src/beats.gif">
 <br><br>
 ## Installation
