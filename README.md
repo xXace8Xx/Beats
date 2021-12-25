@@ -1,5 +1,5 @@
 # Beats
-
+## beats
 ![Beats](src/beatsimg1.png)
 
 A bash based music player!
