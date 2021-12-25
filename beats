@@ -1,224 +1,228 @@
 #! /bin/bash
 
 
+# Most recently modified by Randomguy on 25 DEC 2021 [01:02 IST]
+# Need help? https://github.com/Randomguy-8/Beats
 
+# todo 
+# ffplay support
+
+# Predefine
 Version=3.0
-cd
-pwd=$PWD
-
+lastupdated="25 DEC 2021"
+randomnum=$((RANDOM % 10))
+pwd1=$PWD
+# Colors
 Red='\033[0;31m'
+Lred='\033[1;31m'
+Green='\033[0;32m'
+Lgreen='\033[1;32m'
+Brown='\033[0;33m'
 Blue='\033[0;34m'
+Lblue='\033[1;34m'
 Purple='\033[0;35m'
+Cyan='\033[0;36m'
+Grey='\033[0;37m'
+White='\033[1;37m'
 Noc='\033[0m'
-BO='\033[0;33m'
 
-# simple note while playing music
-note1() {
-	title
-	echo
-	printf "${BO}Type CTRL+c to exit\n"
+
+
+
+
+
+
+
+title_() {
+  echo
+  echo -e "$randomcolor █▄▄ █▀▀ ▄▀█ ▀█▀ █▀\n █▄█ ██▄ █▀█  █  ▄█$Noc"
 }
-# animation while playing music
-animation() {
-	chars="\|/-"
-	while :; do
-  	for (( i=0; i<${#chars}; i++ )); do
-	    sleep 0.1
-	    echo -en "${chars:$i:1}" "\r""${BO}Playing Beat from $pwd2...${Noc}"
-	done
-	done
+pause_() {
+  echo -ne "$Lgreen \bPress any key to continue...$Noc" && read -N 1 pause
 }
-# top title(beats!||!)
-title() {
-	printf "${Red}Beats !||!${Noc}\n"
+playing_() {
+  echo -e "$randomcolor \bPress [CTRL + c] to exit"
+  chars="/-\|"
+  while true
+  do
+    for (( i=0; i<${#chars}; i++ )); do
+      sleep 0.4
+      echo -en "$randomcolor \bPlaying '$input1'...$pwd2 ${chars:$i:1}" "\r$Noc"
+  done
+  done
 }
-# cd to the files directory
-workarea() {
-	cd $(dirname $b\ $c)
-	cd $(dirname $b\ $c\ $d)
-	cd $(dirname $b\ $c\ $d\ $e)
-	cd $(dirname $b\ $c\ $d\ $e\ $f)
-	cd $(dirname $b\ $c\ $d\ $e\ $f\ $g)
-	cd $(dirname $b\ $c\ $d\ $e\ $f\ $g\ $h)
-	cd $(dirname $b\ $c\ $d\ $e\ $f\ $g\ $i)
-	cd $(dirname $b\ $c\ $d\ $e\ $f\ $g\ $i\ $j)
-	cd $(dirname $b\ $c\ $d\ $e\ $f\ $g\ $i\ $j\ $k)
+usage_() {
+    echo -e "$White   < beats -a > $Grey  - About $Noc" && echo -e "$White   < beats -h > $Grey  - Help $Noc" && echo -e "$White   < beats -b \"music_name\" > $Grey  - Play directly $Noc"
 }
-# cheks for beats availabe inside PWD after playing a music 
-beatnearby() {
-	workarea
-	clear
-	title
-	printf "${BO}More beats inside $pwd2... ${Noc} \n"
-	echo
-	ls *.mp3 -c --color -N -X -1
-	echo
+about_() {
+	echo -e "$White \bbeats 		- A simple bash based Music player"
 }
-# Music playing system
-playbeats() {
-	if [[ -e $b ]]
-then
-	note1
-	ffplay -nodisp >/dev/null 2>&1 $b | animation
-	beatnearby
-elif [[ -e $b\ $c ]]
-then
-	note1
-	ffplay -nodisp >/dev/null 2>&1 $b\ $c | animation
-	beatnearby
-elif [[ -e $b\ $c\ $d ]]
-then
-	note1
-	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d | animation
-	beatnearby
-elif [[ -e $b\ $c\ $d\ $e ]]
-then
-	note1
-	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d\ $e | animation
-	beatnearby
-elif [[ -e $b\ $c\ $d\ $e\ $f ]]
-then
-	note1
-	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d\ $e\ $f | animation
-	beatnearby
-elif [[ -e $b\ $c\ $d\ $e\ $f\ $g ]]
-then
-	note1
-	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d\ $e\ $f\ $g | animation
-	beatnearby
-elif [[ -e $b\ $c\ $d\ $e\ $f\ $g\ $h ]]
-then
-	note1
-	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d\ $e\ $f\ $g\ $h | animation
-	beatnearby
-elif [[ -e $b\ $c\ $d\ $e\ $f\ $g\ $h\ $i ]]
-then
-	note1
-	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d\ $e\ $f\ $g\ $h\ $i | animation
-	beatnearby
-elif [[ -e $b\ $c\ $d\ $e\ $f\ $g\ $h\ $i\ $j ]]
-then
-	note1
-	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d\ $e\ $f\ $g\ $h\ $i\ $j | animation
-	beatnearby
-elif [[ -e $b\ $c\ $d\ $e\ $f\ $g\ $h\ $i\ $j\ $k ]]
-then
-	note1
-	ffplay -nodisp >/dev/null 2>&1 $b\ $c\ $d\ $e\ $f\ $g\ $h\ $i\ $j\ $k | animation
-	beatnearby
+help_() {
+	echo -e "$White \bBeats  -  A simple music playing script \n\n\n++ INFO\n\n  Version = $Version \n  LMD = $lastupdated \n\n++ USAGE\n" && usage_ && echo -e "\n$White++ EXTRA\n\n  If you need any further help check: https://github.com/Randomguy-8/Beats\n"
+}
+playbeat_() {
+# cd to home directory, if file not exist
+if [[ -e $input1 ]]; then
+  clear
+  title_
+  echo && echo && sleep 0.2
+  mpg321 >> /dev/null 2>&1 "$input1" | playing_
+  $0 -lp "$input1"
 else
-	echo Opps! file not found.
-	echo
+  cd
+  if [[ -e $input1 ]]; then
+    clear
+    title_
+    echo && echo && sleep 0.2
+    mpg321 >> /dev/null 2>&1 "$input1" | playing_
+    $0 -lp "$input1"
+    # error if file not found
+  else
+      clear
+      echo -e "$Red \bfile, $input1 not found!$Noc"
+      exit
+  fi
 fi
 }
+randomcolor_() {
+  if [[ $randomnum = 1 ]]; then
+    randomcolor=$Red
+  elif [[ $randomnum = 2 ]]; then
+    randomcolor=$Lgreen
+  elif [[ $randomnum = 3 ]]; then
+    randomcolor=$Brown
+  elif [[ $randomnum = 4 ]]; then
+    randomcolor=$Cyan
+  elif [[ $randomnum = 5 ]]; then
+    randomcolor=$Purple
+  elif [[ $randomnum = 6 ]]; then
+    randomcolor=$Lblue
+  elif [[ $randomnum = 6 ]]; then
+    randomcolor=$Lred
+  elif [[ $randomnum = 7 ]] || [[ $randomnum = 8 ]] || [[ $randomnum = 9 ]] || [[ $randomnum = 0 ]]; then
+    randomnum=$((RANDOM % 10))
+    randomcolor_
+  fi
+}
 
-# cheks if dependency exist or not
-if [[ -e /bin/ffplay ]]
-then
-	Dependency="Exist"
+
+
+
+# Random color!
+randomcolor_
+
+# Passed agruments!
+if [[ $1 = "-a" ]]; then
+   about_
+   exit
+elif [[ $1 = "-h" ]]; then
+  clear
+  help_
+  exit
+elif [[ $1 = "-b" ]]; then
+  if [[ -z $2 ]]; then
+    echo -e "\n$White  <usage> beat -b \"Music_name\"\n$Noc"
+    exit
+  fi
+  input1=$2
+  playbeat_
+  exit
+# recently played 
+elif [[ $1 = "-lp" ]]; then
+  input1=$2
+elif [[ $1 = -* ]]; then
+  arg1=$1
+  clear
+  usage_
+  exit
+fi
+
+# if mpg123 or mpg321 is installed or not 
+if [[ -e /bin/mpg321 ]] || [[ -e /bin/mgg123 ]]; then
+  sleep 0
 else
-	title
-	printf "${BO}Dependency=Not_Exist $Noc \n"
-	echo
-	echo "You need to install dependency before running this tool,"
-	echo "we can even install it right now! do want to install?"
-	echo "Type \"y\" to install or \"n\" to cancle."
-	read yn
-	if [[ $yn = y ]] || [[ $yn = Y ]]
-	then
-		sudo apt install ffmpeg
-	else
-		clear
-		title
-		echo
-		echo "Ok, as you wish..."
-		echo
-		echo "you an always install it by typing \"sudo apt install ffmpeg\""
-		echo
-		exit
-		break
-	fi
+  clear
+  echo -e "$White \n <mpg321 not found> please install it on your system\n check https://github.com/Randomguy-8/Beats page for help on how to install it on your system\n" && exit
 fi
 
 # Main page!
+# Input!
 clear
-title
 echo
-printf "${Blue}Version = $Version \n"
-printf "Dependency = $Dependency \n"
-printf "Present directory = $pwd ${Noc}\n" 
-echo
-echo
-cd Music
-echo "Beats availabe in music directory:"
-echo
-ls *.mp3 -c --color -N -X -1
-echo
-cd
-printf "${Purple}Beat name:${Noc} "
-read b c d e f g h i j k
-clear
+echo -e "$Brown   [ENTER] Move to HOME directory."
+echo -e "   [Q] Quite script."
+echo -e "   [M] More options.$Noc\n"
+# Lasted played!
+if [[ ! -z $input1 ]] && [[ $input1 = *.mp* ]]; then
+  echo -e "$Grey \bLast played: '$input1'$Noc"
+fi
+echo -ne "$Cyan$pwd1/$Noc" && read input1
 
-#
-
-
-if [[ -e Music/$b ]]
-	then
-	cd Music
-	pwd2=$PWD
-	playbeats
-elif [[ -e Music/$b\ $c ]]
-	then
-	cd Music
-	pwd2=$PWD
-	playbeats
-elif [[ -e Music/$b\ $c\ $d ]]
-	then
-	cd Music
-	pwd2=$PWD
-	playbeats
-elif [[ -e Music/$b\ $c\ $d\ $e ]]
-	then
-	cd Music
-	pwd2=$PWD
-	playbeats
-elif [[ -e Music/$b\ $c\ $d\ $e\ $f ]]
-	then
-	cd Music
-	pwd2=$PWD
-	playbeats
-elif [[ -e Music/$b\ $c\ $d\ $e\ $f\ $g ]]
-	then
-	cd Music
-	pwd2=$PWD
-	playbeats
-elif [[ -e Music/$b\ $c\ $d\ $e\ $f\ $g\ $h ]]
-	then
-	cd Music
-	pwd2=$PWD
-	playbeats
-elif [[ -e Music/$b\ $c\ $d\ $e\ $f\ $g\ $h\ $i ]]
-	then
-	cd Music
-	pwd2=$PWD
-	playbeats
-elif [[ -e Music/$b\ $c\ $d\ $e\ $f\ $g\ $h\ $i\ $j ]]
-	then
-	cd Music
-	pwd2=$PWD
-	playbeats
-elif [[ -e Music/$b\ $c\ $d\ $e\ $f\ $g\ $h\ $i\ $j\ $k ]]
-	then
-	cd Music
-	pwd2=$PWD
-	playbeats
-
-
-else
-	workarea
-	pwd2=$PWD
-	clear
-	cd
-	playbeats
+# [Enter] to move to Home directory!
+if [[ -z $input1 ]]; then
+echo -ne "$Cyan$HOME/$Noc" && read input1
+  if [[ -z $input1 ]]; then
+    clear
+    echo -e "$Red \bNo Input! Exited.$Noc" && exit
+  fi
 fi
 
+# Special input!
+if [[ $input1 = m ]] || [[ $input1 = M ]]; then
+  clear
+  echo
+ # Install option if not exist!
+  if [[ -e /bin/beats ]]; then
+    sleep 0
+  else
+  echo -e "$Brown   [I] INSTALL"
+  fi
+  echo -e "$Brown   [b] BACK"
+  echo -e "   [h] HELP"
+  echo -e "   [a] ABOUT$Noc\n"
+  echo -ne "$Cyan \b@Beats: $Noc"
+  read input2
+   if [[ $input2 = i ]] || [[ $input2 = I ]]; then
+    sleep 1
+    clear && echo
+    mv $0 beats
+    sudo cp beats /bin | echo -e "$Brown \bcopying..."
+    echo -e "\n$Brown \bdone. Now type \"beats\" in terminal to run."
+    pause_ && exit
+  elif [[ $input2 = a ]] || [[ $input2 = A ]]; then
+    clear
+    about_
+    echo && pause_
+    $0
+    exit
+  elif [[ $input2 = h ]] || [[ $input2 = H ]]; then
+    clear
+    help_
+    pause_
+    $0
+    exit
+  elif [[ $input2 = b ]] || [[ $input2 = B ]]; then
+    clear
+    $0
+    exit
+  else
+    clear
+    echo -e "$Red \bUnknown Input!$Noc\n" && pause_
+    $0
+    exit
+  fi
+elif [[ $input1 = q ]] || [[ $input1 = Q ]]; then
+  clear
+  echo -e "$Red \bExited.$Noc" && exit
+fi
+
+# If given input have mpg format or not
+if [[ $input1 = *.mp* ]]; then
+  sleep 0
+else
+  clear
+  echo -e "$Red \bBeats only support MPEG audio format!$Noc"
+  exit
+fi
+
+playbeat_
