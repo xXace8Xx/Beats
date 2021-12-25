@@ -7,7 +7,8 @@ A konsole based music player!
 - mpg321
 
 ### Usage
-``` -a -- About
+``` 
+-a -- About
 -h -- Help
 -b "music" -- Play directly 
 ```
