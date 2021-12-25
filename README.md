@@ -1,5 +1,5 @@
 ### Beats !||!
-A bash based, music player!
+A bash based music player!
 <br>
 
 ### Depedendencies
