@@ -1,4 +1,4 @@
-### Beats !||!
+# Beats !||!
 
 A bash based music player!
 <br>
@@ -13,9 +13,14 @@ A bash based music player!
 -h -- Help
 -b -- Play it directly 
 ```
-
-### Installation
-<b>through Terminal</b>
+## Preview
+<b>Main page</b>
+<img src="https://github.com/Randomguy-8/Beats/blob/main/beatsimg1.png">
+<b>Playing</b>
+<img src="https://github.com/Randomguy-8/Beats/blob/main/beats.gif">
+<br>
+## Installation
+<b>Through Terminal</b>
 1) Open terminal!
 2) `cd` to the tool.
 3) Type `chmod +x beats` to give it all executable permissions.
