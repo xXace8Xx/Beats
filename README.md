@@ -13,7 +13,7 @@ A bash based music player!
 -b -- Play it directly 
 ```
 
-### How to Install?
+### Installation
 <b>through Terminal</b>
 1) Open terminal!
 2) `cd` to the tool.
