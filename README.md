@@ -6,6 +6,12 @@ A konsole based music player!
 
 - mpg321
 
+### Usage
+``` -a -- About
+-h -- Help
+-b "music" -- Play directly 
+```
+
 ### How to Install?
 <b>By Terminal</b>
 1) Open terminal!
