@@ -13,12 +13,13 @@ A bash based music player!
 -h -- Help
 -b -- Play it directly 
 ```
-## Preview
-<b>Main page</b>
-<img src="https://github.com/Randomguy-8/Beats/blob/main/src/beatsimg1.png"><br>
-<b>Playing</b>
-<img src="https://github.com/Randomguy-8/Beats/blob/main/src/beats.gif">
 <br>
+## Preview
+<b>Main page</b><br>
+<img src="https://github.com/Randomguy-8/Beats/blob/main/src/beatsimg1.png"><br>
+<b>Playing</b><br>
+<img src="https://github.com/Randomguy-8/Beats/blob/main/src/beats.gif">
+<br><br>
 ## Installation
 <b>Through Terminal</b>
 1) Open terminal!
