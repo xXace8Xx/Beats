@@ -32,8 +32,8 @@ A bash based music player!
 
 
 ## License
-Beats is distributed under GPLv2 license. See LICENSE file.
+Beats is distributed under GPLv3 license. See LICENSE file.
 
+
+## Thx for downloading
 ENJOY
-
-#### Thx for downloading
