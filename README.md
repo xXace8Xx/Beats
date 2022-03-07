@@ -11,7 +11,7 @@ A bash based music player!
 ``` 
 -a -- About
 -h -- Help
--b -- Play it directly 
+-b -- Play Music directly 
 ```
 <br>
 
