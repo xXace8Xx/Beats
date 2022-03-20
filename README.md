@@ -1,8 +1,10 @@
 # Beats
+## A bash based music player!
 
-A bash based music player!
-<br>
+
 ![Beats](src/beatsimg1.png)
+
+
 ### Depedendencies
 
 - mpg321
@@ -16,10 +18,6 @@ A bash based music player!
 <br>
 
 ## Preview
-<br>
-<b>Main page!</b><br>
-<img src="https://github.com/Randomguy-8/Beats/blob/main/src/beatsimg1.png">
-<br>
 <b>Color changes every time you play different beat!</b><br>
 <img src="https://github.com/Randomguy-8/Beats/blob/main/src/beats.gif">
 <br>
