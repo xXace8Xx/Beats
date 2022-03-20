@@ -2,7 +2,7 @@
 
 A bash based music player!
 <br>
-
+![Beats](src/beatsimg1.png)
 ### Depedendencies
 
 - mpg321
