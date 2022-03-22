@@ -1,228 +1,144 @@
-#! /bin/bash
-
-
-# Most recently modified by Randomguy on 25 DEC 2021 [01:02 IST]
-# Need help? https://github.com/Randomguy-8/Beats
-
-# todo 
-# ffplay support
+#! /bin/bash 
+set -e
 
 # Predefine
-Version=3.0
-lastupdated="25 DEC 2021"
-randomnum=$((RANDOM % 10))
-pwd1=$PWD
+Version=22.3.20
+lastupdated="20 MAR 2021"
 # Colors
-Red='\033[0;31m'
-Lred='\033[1;31m'
-Green='\033[0;32m'
-Lgreen='\033[1;32m'
-Brown='\033[0;33m'
-Blue='\033[0;34m'
-Lblue='\033[1;34m'
-Purple='\033[0;35m'
-Cyan='\033[0;36m'
-Grey='\033[0;37m'
+Blue='\033[1;34m'
+Green='\033[1;32m'
+Purple='\033[1;35m'
+Cyan='\033[1;36m'
+Grey='\033[1;37m'
+Lgrey='\033[0;37m'
 White='\033[1;37m'
 Noc='\033[0m'
 
-
-
-
-
-
-
-
+## Title
 title_() {
-  echo
-  echo -e "$randomcolor █▄▄ █▀▀ ▄▀█ ▀█▀ █▀\n █▄█ ██▄ █▀█  █  ▄█$Noc"
+  echo -en "\n$Purple █▄▄ █▀▀ ▄▀█ ▀█▀ █▀\n █▄█ ██▄ █▀█  █  ▄█\n$Noc"
 }
-pause_() {
-  echo -ne "$Lgreen \bPress any key to continue...$Noc" && read -N 1 pause
+## Shuffell Directory back and forth
+shuffel_directory_(){
+	# Cd to music or pwd
+	if [[ $DoShuffel == true ]]; then
+		if [[ $turn == 1 ]]; then
+			if [[ -e ~/Music ]]; then
+				cd ~/Music
+			else
+				mkdir ~/Music
+				cd ~/Music
+			fi
+			turn=2 # next time sd_ execute it will goto Initial directory
+		elif [[ $turn == 2 ]]; then
+			cd $InitialDirectory
+			turn=1
+		fi
+	fi
 }
-playing_() {
-  echo -e "$randomcolor \bPress [CTRL + c] to exit"
-  chars="/-\|"
-  while true
-  do
-    for (( i=0; i<${#chars}; i++ )); do
-      sleep 0.4
-      echo -en "$randomcolor \bPlaying '$input1'...$pwd2 ${chars:$i:1}" "\r$Noc"
-  done
-  done
+## list Music
+list_(){
+	clear && title_ && shuffel_directory_
+	# Directory: PWD
+	echo -e "\n\033[7;34m~ Directory:$Grey" $PWD "$Noc$Cyan\n" 
+	if ls $PWD/*.mp3 &>/dev/null ; then
+		# List Beats and save inside ~/Beats/data/.beats_file 
+		ls *.mp3 | nl -s ". " | cut -c 5- & ls *.mp3 | nl | cut -c 8- | cat > ~/Beats/data/.beats_file
+	else
+		echo -e "$Grey No file found."
+	fi
+	echo -en "\n$Green+ Beat no: $White" & read input1
+	# If input is null then change pwd
+	if [[ -z $input1 ]]; then
+		DoShuffel=true && list_
+	fi
 }
-usage_() {
-    echo -e "$White   < beats -a > $Grey  - About $Noc" && echo -e "$White   < beats -h > $Grey  - Help $Noc" && echo -e "$White   < beats -b \"music_name\" > $Grey  - Play directly $Noc"
+information_of_beat_(){
+	title_
+	Artist=$(mp3info -p %a "$BeatFile" 2>/dev/null) 
+	Genre=$(mp3info -p %g "$BeatFile" 2>/dev/null)
+	Year=$(mp3info -p %y "$BeatFile" 2>/dev/null)
+	TotalTime=$(mp3info -p %S "$BeatFile" 2>/dev/null)
+	TotalSize=$(mp3info -p %k "$BeatFile" 2>/dev/null)
+	Comment=$(mp3info -p %c "$BeatFile" 2>/dev/null)
+	echo -e "\n\n$Blue - Beat:$Noc$White $BeatFile$Noc"	
+	# Artist
+	if [[ $Artist == "" ]]; then
+		echo -e "$Blue - Artist:$Noc$White N/A$Noc"	
+	else
+		echo -e "$Blue - Artist:$Noc$White $Artist$Noc"
+	fi
+	# Genre
+	if [[ $Genre == "" ]]; then
+		echo -e "$Blue - Genre:$Noc$White N/A$Noc"
+	else
+		echo -e "$Blue - Genre:$Noc$White $Genre$Noc"
+	fi
+	# Year of production
+	if [[ $Year == "" ]]; then
+		echo -e "$Blue - Year:$Noc$White N/A$Noc"
+	else
+		echo -e "$Blue - Year:$Noc$White $Year$Noc"
+	fi
+	# Total Time
+	if [[ $TotalTime == "" ]]; then
+		echo -e "$Blue - Time:$Noc$White N/A$Noc"	
+	else
+		echo -e "$Blue - Time:$Noc$White $TotalTime sec$Noc"
+	fi
+	# Size Of File
+	if [[ $TotalSize == "" ]]; then
+		echo -e "$Blue - Size:$Noc$White N/A$Noc"	
+	else
+		echo -e "$Blue - Size:$Noc$White $TotalSize KB$Noc"
+	fi
+	# Comment
+	if [[ $Comment == "" ]]; then
+		echo -e "$Blue - Comment:$Noc$White N/A$Noc"	
+	else
+		echo -e "$Blue - Comment:$Noc$White $Comment$Noc"
+	fi
 }
-about_() {
-	echo -e "$White \bbeats 		- A simple bash based Music player"
+functional_keys_(){	
+	while(true); do
+		read -N 1 FunctionInput
+		if [[ $FunctionInput == 'q' || $FunctionInput == 'Q' || $FunctionInput == 'a' || $FunctionInput == 'A' ]]; then
+			# Change Volume
+			amixer sget Master | awk '/%/ {gsub(/[\[\]%]/,""); print "Volume="$4}' | cat > ~/Beats/data/.beats_default
+			source ~/Beats/data/.beats_default
+			if [[ $FunctionInput == 'q' || $FunctionInput == 'Q' ]]; then
+				Volume=$((Volume + 5))
+				if [[ $Volume -ge 100 ]]; then
+					Volume=100
+				fi
+			elif [[ $FunctionInput == 'a' || $FunctionInput == 'A' ]]; then
+				Volume=$((Volume - 5))
+				if [[ $Volume -le 1 ]]; then
+					Volume=0
+				fi
+			fi
+				echo -en "\b Volume: $Volume \r"
+				amixer set Master ${Volume}"%" 1>/dev/null
+		elif [[ $FunctionInput == 'x' ]]; then
+			# Stop Beats
+			kill $PRCSa & clear && information_of_beat_ && echo -en "\n\n\033[5;33m Done$Noc\n\n"
+			exit
+		fi
+	done
+	functional_keys_
 }
-help_() {
-	echo -e "$White \bBeats  -  A simple music playing script \n\n\n++ INFO\n\n  Version = $Version \n  LMD = $lastupdated \n\n++ USAGE\n" && usage_ && echo -e "\n$White++ EXTRA\n\n  If you need any further help check: https://github.com/Randomguy-8/Beats\n"
-}
-playbeat_() {
-# cd to home directory, if file not exist
-if [[ -e $input1 ]]; then
-  clear
-  title_
-  echo && echo && sleep 0.2
-  mpg321 >> /dev/null 2>&1 "$input1" | playing_
-  $0 -lp "$input1"
-else
-  cd
-  if [[ -e $input1 ]]; then
-    clear
-    title_
-    echo && echo && sleep 0.2
-    mpg321 >> /dev/null 2>&1 "$input1" | playing_
-    $0 -lp "$input1"
-    # error if file not found
-  else
-      clear
-      echo -e "$Red \bfile, $input1 not found!$Noc"
-      exit
-  fi
+## Main screen
+InitialDirectory=$PWD && DoShuffel=true	&& turn=1
+if [[ ! -d ~/Beats/data ]]; then
+mkdir ~/Beats ~/Beats/data 1>&2 > /dev/null
 fi
-}
-randomcolor_() {
-  if [[ $randomnum = 1 ]]; then
-    randomcolor=$Red
-  elif [[ $randomnum = 2 ]]; then
-    randomcolor=$Lgreen
-  elif [[ $randomnum = 3 ]]; then
-    randomcolor=$Brown
-  elif [[ $randomnum = 4 ]]; then
-    randomcolor=$Cyan
-  elif [[ $randomnum = 5 ]]; then
-    randomcolor=$Purple
-  elif [[ $randomnum = 6 ]]; then
-    randomcolor=$Lblue
-  elif [[ $randomnum = 6 ]]; then
-    randomcolor=$Lred
-  elif [[ $randomnum = 7 ]] || [[ $randomnum = 8 ]] || [[ $randomnum = 9 ]] || [[ $randomnum = 0 ]]; then
-    randomnum=$((RANDOM % 10))
-    randomcolor_
-  fi
-}
-
-
-
-
-# Random color!
-randomcolor_
-
-# Passed agruments!
-if [[ $1 = "-a" ]]; then
-   about_
-   exit
-elif [[ $1 = "-h" ]]; then
-  clear
-  help_
-  exit
-elif [[ $1 = "-b" ]]; then
-  if [[ -z $2 ]]; then
-    echo -e "\n$White  <usage> beat -b \"Music_name\"\n$Noc"
-    exit
-  fi
-  input1=$2
-  playbeat_
-  exit
-# recently played 
-elif [[ $1 = "-lp" ]]; then
-  input1=$2
-elif [[ $1 = -* ]]; then
-  arg1=$1
-  clear
-  usage_
-  exit
-fi
-
-# if mpg123 or mpg321 is installed or not 
-if [[ -e /bin/mpg321 ]] || [[ -e /bin/mgg123 ]]; then
-  sleep 0
-else
-  clear
-  echo -e "$White \n <mpg321 not found> please install it on your system\n check https://github.com/Randomguy-8/Beats page for help on how to install it on your system\n" && exit
-fi
-
-# Main page!
-# Input!
-clear
-echo
-echo -e "$Brown   [ENTER] Move to HOME directory."
-echo -e "   [Q] Quite script."
-echo -e "   [M] More options.$Noc\n"
-# Lasted played!
-if [[ ! -z $input1 ]] && [[ $input1 = *.mp* ]]; then
-  echo -e "$Grey \bLast played: '$input1'$Noc"
-fi
-echo -ne "$Cyan$pwd1/$Noc" && read input1
-
-# [Enter] to move to Home directory!
-if [[ -z $input1 ]]; then
-echo -ne "$Cyan$HOME/$Noc" && read input1
-  if [[ -z $input1 ]]; then
-    clear
-    echo -e "$Red \bNo Input! Exited.$Noc" && exit
-  fi
-fi
-
-# Special input!
-if [[ $input1 = m ]] || [[ $input1 = M ]]; then
-  clear
-  echo
- # Install option if not exist!
-  if [[ -e /bin/beats ]]; then
-    sleep 0
-  else
-  echo -e "$Brown   [I] INSTALL"
-  fi
-  echo -e "$Brown   [b] BACK"
-  echo -e "   [h] HELP"
-  echo -e "   [a] ABOUT$Noc\n"
-  echo -ne "$Cyan \b@Beats: $Noc"
-  read input2
-   if [[ $input2 = i ]] || [[ $input2 = I ]]; then
-    sleep 1
-    clear && echo
-    mv $0 beats
-    sudo cp beats /bin | echo -e "$Brown \bcopying..."
-    echo -e "\n$Brown \bdone. Now type \"beats\" in terminal to run."
-    pause_ && exit
-  elif [[ $input2 = a ]] || [[ $input2 = A ]]; then
-    clear
-    about_
-    echo && pause_
-    $0
-    exit
-  elif [[ $input2 = h ]] || [[ $input2 = H ]]; then
-    clear
-    help_
-    pause_
-    $0
-    exit
-  elif [[ $input2 = b ]] || [[ $input2 = B ]]; then
-    clear
-    $0
-    exit
-  else
-    clear
-    echo -e "$Red \bUnknown Input!$Noc\n" && pause_
-    $0
-    exit
-  fi
-elif [[ $input1 = q ]] || [[ $input1 = Q ]]; then
-  clear
-  echo -e "$Red \bExited.$Noc" && exit
-fi
-
-# If given input have mpg format or not
-if [[ $input1 = *.mp* ]]; then
-  sleep 0
-else
-  clear
-  echo -e "$Red \bBeats only support MPEG audio format!$Noc"
-  exit
-fi
-
-playbeat_
+list_ && clear
+# stores the name of beat
+BeatFile=$(sed -n $input1"p" ~/Beats/data/.beats_file)
+while [[ $BeatFile == "" ]]; do
+	DoShuffel=false && list_ && clear
+	BeatFile=$(sed -n ${input1}"p" ~/Beats/data/.beats_file)
+done
+information_of_beat_ && echo -en "\n\n\033[5;33m Playing...$Noc\n\n"
+# Main binary that plays mp3
+mpg321 "$BeatFile" 2>/dev/null & PRCSa=$! && functional_keys_
