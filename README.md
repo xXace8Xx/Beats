@@ -1,8 +1,10 @@
-# Beats
+# WIP
+
+### Beats
 ## A bash based music player!
 
 
-![Beats](src/beatsimg1.png)
+
 
 
 ### Depedendencies
@@ -16,12 +18,6 @@
 -b -- Play Music directly 
 ```
 <br>
-
-## Preview
-<b>Color changes every time you play different beat!</b><br>
-<img src="https://github.com/Randomguy-8/Beats/blob/main/src/beats.gif">
-<br>
-
 ## Installation
 <b>Through Terminal</b>
 1) Open terminal!
