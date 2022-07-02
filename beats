@@ -1,144 +1,427 @@
-#! /bin/bash 
-set -e
+#!/usr/bin/env bash
+#
+# BEATS: Standalone script to play BEATS
+# https://www.github.com/Randomguy-8/Beats
+#
+# Last Modified 6-6-2022
 
-# Predefine
-Version=22.3.20
-lastupdated="20 MAR 2021"
-# Colors
-Blue='\033[1;34m'
-Green='\033[1;32m'
-Purple='\033[1;35m'
-Cyan='\033[1;36m'
-Grey='\033[1;37m'
-Lgrey='\033[0;37m'
-White='\033[1;37m'
-Noc='\033[0m'
 
-## Title
+
+## ToDo
+
+# Add config
+## improve appearnce (colors) = Done on [1-7-2022]
+### Adding Dev.debug line = Done
+# Adding more status
+## Improving functionality = Done on [30-6-2022]
+# Setting right key for right functions
+# Documentation
+# Adding Short by (List by Alphabet, size, album)
+# Adding playlist, Multiple folders
+# More information about Beat
+# Adding in Every os' repositry (Making it available via package managers)
+# Try to add online support
+# Data to import and export
+# Setting page
+# Cool "About" Page
+# Adding symbolic Icons
+# Allow window to resize upto 1 line and 55 columns
+# Themes and Plugins
+# Add argument (-p) and its Options ( RANDOM, LASTSESSON, FISTSONG, LASTSONG) or any other particular song
+## Cleaning Code - (Rearranging functions, removing useless code, ) = Done on [10-6-2022] [30-6-2022]
+
+
+
+
+## Predefine
+Version=22.6.6
+sleep 0.01 && Columns=$COLUMNS && Lines=$LINES
+DirectoryOfBeats="$HOME/Music"
+
+## Variables & Arrays
+TextSize=""          # Size Of Text
+Beat_Name[0]=""      # Stores name of the beats
+TemporaryNumber=""   # Just for temporary
+TotalNoOfBeats=""    # Number of BEAT files
+Input1=""            # Takes Input
+SelectedBeat=""      # Beat that is selected
+BeatToPlay=""        # Name of the beat that is going to play
+
+
+
+## Colors
+
+# Regular
+Black='\e[0;30m' && Red='\e[0;31m'
+Green='\e[0;32m' && Yellow='\e[0;33m'
+Blue='\e[0;34m' && Purple='\e[0;35m'
+Cyan='\e[0;36m' && White='\e[0;37m'
+# Bold
+BoldBlack='\e[1;30m' && BoldRed='\e[1;31m'
+BoldGreen='\e[1;32m' && BoldYellow='\e[1;33m'
+BoldBlue='\e[1;34m' && BoldPurple='\e[1;35m'
+BoldCyan='\e[1;36m' && BoldWhite='\e[1;37m'
+# Italic
+ItalicBlack='\e[3;30m' && ItalicRed='\e[3;31m'
+ItalicGreen='\e[3;32m' && ItalicYellow='\e[3;33m'
+ItalicBlue='\e[3;34m' && ItalicPurple='\e[3;35m'
+ItalicCyan='\e[3;36m' && ItalicWhite='\e[3;37m'
+# Underline
+UnderlineBlack='\e[4;30m' && UnderlineRed='\e[4;31m'
+UnderlineGreen='\e[4;32m' && UnderlineYellow='\e[4;33m'
+UnderlineBlue='\e[4;34m' && UnderlinePurple='\e[4;35m'
+UnderlineCyan='\e[4;36m' && UnderlineWhite='\e[4;37m'
+# BackgroUnderline
+BackgroundBlack='\e[40m' && BackgroundRed='\e[41m'
+BackgroundGreen='\e[42m' && BackgroundYellow='\e[43m'
+BackgroundBlue='\e[44m' && BackgroundPurple='\e[45m'
+BackgroundCyan='\e[46m' && BackgroundWhite='\e[47m'
+# Reset
+Noc='\e[0m'
+
+
+
+chracters_(){
+    ## Stolen From Simple Bash Curses. 
+    
+        if [[ $LANG == *.UTF-8 ]]; then
+            _TL="\xE2\x94\x8C"
+            _TR="\xE2\x94\x90"
+            _BL="\xE2\x94\x94"
+            _BR="\xE2\x94\x98"
+            _SEPL="\xE2\x94\x9C"
+            _SEPR="\xE2\x94\xA4"
+            _VLINE="\xE2\x94\x82"
+            _HLINE="\xE2\x94\x80"
+            _DIAMOND="\xE2\x97\x86"
+            _BLOCK="\xE2\x96\x88"
+        elif [[ $LANG == "ascii" ]]; then
+            _TL="+"
+            _TR="+"
+            _BL="+"
+            _BR="+"
+            _SEPL="+"
+            _SEPR="+"
+            _VLINE="|"
+            _HLINE="-"
+            _DIAMOND="*"
+            _BLOCK="#"
+        else
+            _TL="\033(0l\033(B"
+            _TR="\033(0k\033(B"
+            _BL="\033(0m\033(B"
+            _BR="\033(0j\033(B"
+            _SEPL="\033(0t\033(B"
+            _SEPR="\033(0u\033(B"
+            _VLINE="\033(0x\033(B"
+            _HLINE="\033(0q\033(B"
+            _DIAMOND="\033(00\033(B"
+            _BLOCK="\033(01\033(B"
+        fi
+        
+        #LC_ALL=C
+        #LANG=C
+        
+#while [[ $Columns -gt $TempraryNumber ]]; do
+#echo -en $_HLINE
+#((TempraryNumber++))
+#done
+}
+
+
+
+
+
+
+
+center_simple_(){
+    TextSize=$(echo -n "$1" | wc     -m)
+
+    for (( i1=1; i1 < $(( (Columns/2) - (TextSize/2) )); i1++ )); do
+        echo -en " "
+    done
+
+    echo -en "$2" "$3$1"  # $2 = parameters | $3 = Colors | $1 = text
+    
+    for (( i1=0; i1 < $(( (Columns/2) - (TextSize/2) - 2 )); i1++ )); do
+        echo -en " "
+    done
+
+    echo
+}
+
+center_absolute_(){
+    TextSize="$(echo -n "$2" | wc -m)" && CenterOfColumns=$5
+    [[ -z $5 ]] && CenterOfColumns=$(( (Columns/2) - (TextSize/2) + 1))  # +1 (dont know)
+    echo -e "$3" "$Noc\e[${1};${CenterOfColumns}H$4$2$Noc"  # $1 = Row No. | $2 = text | $3 = parameters | $4 = Colors | $5 Column
+}
+
+
 title_() {
-  echo -en "\n$Purple █▄▄ █▀▀ ▄▀█ ▀█▀ █▀\n █▄█ ██▄ █▀█  █  ▄█\n$Noc"
+    center_absolute_ "1" "BEATS PLAYER" "-n" "$BoldCyan"
+
+    if [[ $DebugBar == true ]]; then
+    echo && center_absolute_ 2 " [Sel=$SelectedBeat] [From:To=$ListBeatsFrom:$ListBeatsBeforeFrom] \
+[Show=$NoOfBeatsToShow] [Cen=$CenterOfListedBeats] [Total=$TotalNoOfBeats] " "" "$BoldPurple"
+
+    else
+        # center_absolute_ "2" "Total $TotalNoOfBeats" "" "$BoldPurple" "$((Columns/$Columns))"
+        center_absolute_ "2" "$(echo $PWD | cut -c "$(($(echo $HOME | wc -m) +1))"-)/" "" "$BoldGreen"
+        # center_absolute_ "2" " Selected $SelectedBeat" "" "$BoldPurple" "$((Columns-($(echo -n "$SelectedBeat" | wc -m))-9))"
+    fi
 }
-## Shuffell Directory back and forth
-shuffel_directory_(){
-	# Cd to music or pwd
-	if [[ $DoShuffel == true ]]; then
-		if [[ $turn == 1 ]]; then
-			if [[ -e ~/Music ]]; then
-				cd ~/Music
-			else
-				mkdir ~/Music
-				cd ~/Music
-			fi
-			turn=2 # next time sd_ execute it will goto Initial directory
-		elif [[ $turn == 2 ]]; then
-			cd $InitialDirectory
-			turn=1
-		fi
-	fi
+
+Horizontal_line_(){
+    Text="$_HLINE"
+    for ((i = 0; i < $((Columns-3)); i++ )); do 
+        Text="$_HLINE$Text"
+        ((TempraryNumber++))
+    done
+    echo -en $Text
 }
-## list Music
-list_(){
-	clear && title_ && shuffel_directory_
-	# Directory: PWD
-	echo -e "\n\033[7;34m~ Directory:$Grey" $PWD "$Noc$Cyan\n" 
-	if ls $PWD/*.mp3 &>/dev/null ; then
-		# List Beats and save inside ~/Beats/data/.beats_file 
-		ls *.mp3 | nl -s ". " | cut -c 5- & ls *.mp3 | nl | cut -c 8- | cat > ~/Beats/data/.beats_file
-	else
-		echo -e "$Grey No file found."
-	fi
-	echo -en "\n$Green+ Beat no: $White" & read input1
-	# If input is null then change pwd
-	if [[ -z $input1 ]]; then
-		DoShuffel=true && list_
-	fi
+
+
+main_screne_(){
+    title_
+    center_absolute_ 3 ""
+    
+    for (( i6 = $ListBeatsFrom; i6 < ListBeatsBeforeFrom; i6++ )); do
+        [[ $SelectedBeat -eq $i6 ]] && echo -e "$NOC$BoldWhite${Beat_Name[$i6]}" || echo -e "$NOC$White${Beat_Name[$i6]}"
+    done
+    
+    status_bar_
 }
-information_of_beat_(){
-	title_
-	Artist=$(mp3info -p %a "$BeatFile" 2>/dev/null) 
-	Genre=$(mp3info -p %g "$BeatFile" 2>/dev/null)
-	Year=$(mp3info -p %y "$BeatFile" 2>/dev/null)
-	TotalTime=$(mp3info -p %S "$BeatFile" 2>/dev/null)
-	TotalSize=$(mp3info -p %k "$BeatFile" 2>/dev/null)
-	Comment=$(mp3info -p %c "$BeatFile" 2>/dev/null)
-	echo -e "\n\n$Blue - Beat:$Noc$White $BeatFile$Noc"	
-	# Artist
-	if [[ $Artist == "" ]]; then
-		echo -e "$Blue - Artist:$Noc$White N/A$Noc"	
-	else
-		echo -e "$Blue - Artist:$Noc$White $Artist$Noc"
-	fi
-	# Genre
-	if [[ $Genre == "" ]]; then
-		echo -e "$Blue - Genre:$Noc$White N/A$Noc"
-	else
-		echo -e "$Blue - Genre:$Noc$White $Genre$Noc"
-	fi
-	# Year of production
-	if [[ $Year == "" ]]; then
-		echo -e "$Blue - Year:$Noc$White N/A$Noc"
-	else
-		echo -e "$Blue - Year:$Noc$White $Year$Noc"
-	fi
-	# Total Time
-	if [[ $TotalTime == "" ]]; then
-		echo -e "$Blue - Time:$Noc$White N/A$Noc"	
-	else
-		echo -e "$Blue - Time:$Noc$White $TotalTime sec$Noc"
-	fi
-	# Size Of File
-	if [[ $TotalSize == "" ]]; then
-		echo -e "$Blue - Size:$Noc$White N/A$Noc"	
-	else
-		echo -e "$Blue - Size:$Noc$White $TotalSize KB$Noc"
-	fi
-	# Comment
-	if [[ $Comment == "" ]]; then
-		echo -e "$Blue - Comment:$Noc$White N/A$Noc"	
-	else
-		echo -e "$Blue - Comment:$Noc$White $Comment$Noc"
-	fi
+
+status_bar_(){
+    center_absolute_ "$((Lines-1))" "${BeatToPlay%.*}" "-n" "$BoldBlue"
+    center_absolute_ "$Lines" "$BeatStatus$ShuffelStatus$Duration" "-n" "$BoldRed"
 }
-functional_keys_(){	
-	while(true); do
-		read -N 1 FunctionInput
-		if [[ $FunctionInput == 'q' || $FunctionInput == 'Q' || $FunctionInput == 'a' || $FunctionInput == 'A' ]]; then
-			# Change Volume
-			amixer sget Master | awk '/%/ {gsub(/[\[\]%]/,""); print "Volume="$4}' | cat > ~/Beats/data/.beats_default
-			source ~/Beats/data/.beats_default
-			if [[ $FunctionInput == 'q' || $FunctionInput == 'Q' ]]; then
-				Volume=$((Volume + 5))
-				if [[ $Volume -ge 100 ]]; then
-					Volume=100
-				fi
-			elif [[ $FunctionInput == 'a' || $FunctionInput == 'A' ]]; then
-				Volume=$((Volume - 5))
-				if [[ $Volume -le 1 ]]; then
-					Volume=0
-				fi
-			fi
-				echo -en "\b Volume: $Volume \r"
-				amixer set Master ${Volume}"%" 1>/dev/null
-		elif [[ $FunctionInput == 'x' ]]; then
-			# Stop Beats
-			kill $PRCSa & clear && information_of_beat_ && echo -en "\n\n\033[5;33m Done$Noc\n\n"
-			exit
-		fi
-	done
-	functional_keys_
+
+initialize_beats_(){
+    TotalNoOfBeats=$(find *.m4a *.mp3 2>/dev/null| wc -l)
+
+    #initialize Beats name
+    TemporaryNumber=1
+    clear && center_absolute_ "$((Lines/2))" "Searching for Beats..."
+
+        until [[ $TemporaryNumber -eq $((TotalNoOfBeats+1)) ]]; do
+            Beat_Name[$TemporaryNumber]="$(find *.m4a *.mp3 2>/dev/null| sed -n ${TemporaryNumber}"p")"
+            Beat_Name[$TemporaryNumber]="$(center_simple_ "${Beat_Name[$TemporaryNumber]%.*}")"
+
+                if [[ $(echo -n "${Beat_Name[$TemporaryNumber]}" | wc -m) -gt $Columns ]]; then
+                    Beat_Name[$TemporaryNumber]="$(echo "${Beat_Name[$TemporaryNumber]}" | cut -c -"$((Columns-5))")..."
+                fi
+            ((TemporaryNumber++))
+        done
+
+        clear
+
+    #Show Beats Before from (NEED ATTENTION)
+    if [[ $Lines -lt 6 ]]; then
+        ListBeatsBeforeFrom=3
+    elif [[ $Lines -lt 11 ]]; then
+        ListBeatsBeforeFrom=$((Lines-3))
+    else
+        ListBeatsBeforeFrom=$((Lines-5))
+    fi
+    [[ $ListBeatsBeforeFrom -gt $TotalNoOfBeats ]] && ListBeatsBeforeFrom=$((TotalNoOfBeats+1))
+    
+    NoOfBeatsToShow=$((ListBeatsBeforeFrom-1))
+
+    #Center Of Listed Beats
+    if [[ $NoOfBeatsToShow -lt 2 ]]; then
+        CenterOfListedBeats=1
+    elif [[ $((NoOfBeatsToShow % 2)) -eq 0 ]]; then
+        CenterOfListedBeats=$((NoOfBeatsToShow/2))
+    else
+        CenterOfListedBeats=$(( (NoOfBeatsToShow/2)+1 ))
+    fi
+
+    SelectedBeat=$CenterOfListedBeats && ListBeatsFrom=1
 }
-## Main screen
-InitialDirectory=$PWD && DoShuffel=true	&& turn=1
-if [[ ! -d ~/Beats/data ]]; then
-mkdir ~/Beats ~/Beats/data 1>&2 > /dev/null
-fi
-list_ && clear
-# stores the name of beat
-BeatFile=$(sed -n $input1"p" ~/Beats/data/.beats_file)
-while [[ $BeatFile == "" ]]; do
-	DoShuffel=false && list_ && clear
-	BeatFile=$(sed -n ${input1}"p" ~/Beats/data/.beats_file)
-done
-information_of_beat_ && echo -en "\n\n\033[5;33m Playing...$Noc\n\n"
-# Main binary that plays mp3
-mpg321 "$BeatFile" 2>/dev/null & PRCSa=$! && functional_keys_
+
+controles_(){
+    while true; do
+        main_screne_
+        read -rs -N1 Input1
+
+        case $Input1 in
+            $'\n') # Play Beat
+                PreviousPlayedBeat=$BeatToPlay && BeatToPlay="$(find *.m4a *.mp3 2>/dev/null| sed -n ${SelectedBeat}p)"
+                BeatStatus="Playing" && play_beat_ && clear && continue
+            ;;
+
+            ' ') # Play, Pause
+                PreviousPlayedBeat=$BeatToPlay && BeatToPlay="$(find *.m4a *.mp3 2>/dev/null| sed -n ${SelectedBeat}p)"
+                BeatStatus="Playing" && play_beat_ && clear && continue
+            ;;
+
+            "x") # Stop Beat
+                kill $BEATPID 2> /dev/null
+                BEATPID="" && BeatStatus="Stopped" && continue
+            ;;
+
+            "q") # Exit
+                clear && exit && continue
+            ;;
+
+            "s") # Tongle Shuffel
+                if [[ $Shuffel == false ]]; then
+                    Shuffel=true
+                    ShuffelStatus=" | Shuffel"
+                else
+                    Shuffel=false
+                    ShuffelStatus=""
+                    clear
+                fi
+                continue
+            ;;
+
+            "w") # widgit
+                widgit_time_ && continue
+            ;;
+        esac
+
+        ## Take Special Characters
+        read -t 0.1 -s -n2 Input1
+
+        case $Input1 in
+            "[A" ) # Up
+                if [[ $SelectedBeat -eq 1 ]]; then
+                # When there is no more Beats to select
+                    if [[ $InfinityScrollOfBeats == true ]]; then
+                        SelectedBeat=$((TotalNoOfBeats))
+                        ListBeatsFrom=$((TotalNoOfBeats-NoOfBeatsToShow+1))
+                        ListBeatsBeforeFrom=$((TotalNoOfBeats+1))
+
+                    else
+                        SelectedBeat=1
+                    fi
+
+                elif [[ $SelectedBeat -gt $((ListBeatsFrom+(CenterOfListedBeats-1))) ]]; then
+                # Move "SelectedBeat" to Center from last BEAT.
+                    ((SelectedBeat--))
+
+                elif [[ $ListBeatsBeforeFrom -eq $((NoOfBeatsToShow+1)) ]]; then
+                # Move "SelectedBeat" to first BEAT from Center..
+                    ((SelectedBeat--))
+
+                else
+                    ((SelectedBeat--))
+                    ((ListBeatsFrom--))
+                    ((ListBeatsBeforeFrom--))
+                fi
+            ;;
+
+            "[B" ) # Down
+                if [[ $SelectedBeat -eq $TotalNoOfBeats ]]; then
+                 # When there is no more Beats to select
+                    if [[ $InfinityScrollOfBeats == true ]]; then
+                        SelectedBeat=1
+                        ListBeatsFrom=1
+                        ListBeatsBeforeFrom=$((NoOfBeatsToShow+1))
+
+                    else
+                        SelectedBeat=$((TotalNoOfBeats))
+                    fi
+
+                elif [[ $SelectedBeat -lt $CenterOfListedBeats ]]; then
+                # Move "SelectedBeat" to Center from first BEAT.
+                    ((SelectedBeat++))
+
+                elif [[ $ListBeatsBeforeFrom -gt $TotalNoOfBeats ]]; then
+                # Move "SelectedBeat" to Last BEAT from Center.
+                    ((SelectedBeat++))
+
+                else
+                    ((SelectedBeat++))
+                    ((ListBeatsFrom++))
+                    ((ListBeatsBeforeFrom++))
+                fi
+            ;;
+
+        esac
+
+       # [[ $BEATPID != "" && -z $(ps -e | grep $BEATPID) && $Shuffel == true ]] && shuffel_beat_
+
+    done
+}
+
+play_beat_(){
+
+    if [[ $BEATPID == "" ]]; then
+        ffplay -nodisp "$BeatToPlay" 2>$HOME/.config/Beats-Player/.ffplay.txt & BEATPID=$!
+        sleep 0.5 && Duration=$(cat $HOME/.config/Beats-Player/.ffplay.txt | grep  Duration )
+    else
+        BeatToPlay=$PreviousPlayedBeat ## fix: current playing beat does't get exchange with select Beat
+    fi
+}
+
+startup_check_(){
+    ## Lets throw errors, hahaha! (SYSTEM CHECK)
+    if [[ $Lines -lt 6 || $Columns -lt 50 ]]; then
+        echo -e "$Red \nWindow can't be less than 6 Lines and 50 Columns $Noc" >&2
+        exit 0
+    fi
+
+    if [[ -f /bin/ffplay ]]; then
+        if [[ -f /bin/mpeg321 ]]; then
+            if [[ -f /bin/mpeg123 ]]; then
+                echo -e 'Please Install One of These Dependencies To Play BEATS!\n
+                 \r-> ffplay - Supports moaaaast of Music Formats
+                 \r-> mpg321, mpg123 - Supports Only MPEG Format\n'
+                 exit 0
+            fi
+        fi
+    fi
+}
+
+shuffel_beat_(){
+
+    if [[ $Shuffel == true ]]; then
+        ((SelectedBeat++)) && BEATPID="" && BeatStatus="Stopped"
+        [[ $SelectedBeat -gt $TotalNoOfBeats ]] && SelectedBeat=1
+        BeatToPlay="$(find *.m4a *.mp3 2>/dev/null| sed -n ${SelectedBeat}p)"
+        play_beat_
+    fi
+}
+
+widgit_time_(){
+    clear && title_
+    
+    for (( i2=0; i2 < $((Lines / 2 - 2 -(ListBeatsBeforeFrom-ListBeatsFrom) / 2 )); i2++ )); do
+        echo -en "\n"
+    done
+
+    center_simple_ "$(date)" "-n" "$BoldRed"
+    echo -e "$Noc"
+    read -N 1 TemporaryNumber
+    clear
+}
+
+cursor_enable_(){  stty echo; printf "\e[?25h"; }
+
+
+
+
+
+main(){
+    ## Enable and Disable cursor
+    trap cursor_enable_ EXIT && stty -echo; printf "\e[?25l"  
+   
+    ## Parameters
+    TemporaryNumber=0
+    for i in $@; do
+        Parameters[$TemporaryNumber]="$i"
+        ((TemporaryNumber++))
+    done
+
+    ConfigFile=$HOME/.config/Beats-Player/beats.sh && source $ConfigFile
+    
+    DefaultPWD=$PWD && CurrentBeatsFolder=1 && cd ${Beats_Folder[$CurrentBeatsFolder]}
+
+    BeatStatus="Stopped" && BeatToPlay="Nothing Yet" && Shuffel=false && InfinityScrollOfBeats=false && DebugBar=false
+    chracters_ && startup_check_ && initialize_beats_ && controles_    
+}
+
+main "$@"
