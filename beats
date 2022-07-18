@@ -7,29 +7,6 @@
 
 
 
-## ToDo
-
-# Add config
-## improve appearnce (colors) = Done on [1-7-2022]
-### Adding Dev.debug line = Done
-# Adding more status
-## Improving functionality = Done on [30-6-2022]
-# Setting right key for right functions
-# Documentation
-# Adding Short by (List by Alphabet, size, album)
-# Adding playlist, Multiple folders
-# More information about Beat
-# Adding in Every os' repositry (Making it available via package managers)
-# Try to add online support
-# Data to import and export
-# Setting page
-# Cool "About" Page
-# Adding symbolic Icons
-# Allow window to resize upto 1 line and 55 columns
-# Themes and Plugins
-# Add argument (-p) and its Options ( RANDOM, LASTSESSON, FISTSONG, LASTSONG) or any other particular song
-## Cleaning Code - (Rearranging functions, removing useless code, ) = Done on [10-6-2022] [30-6-2022]
-
 
 
 
