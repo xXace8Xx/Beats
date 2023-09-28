@@ -5,9 +5,10 @@
 ## Status
 # Project restarted: Deadline 10 Sep 2023.
 
+# FixIt: fix -0 in currdur when presing space multiple times
 
 # FixIt: change currently_playing_* to currently_playing_*
-
+# dont save data differ from queue
 
 # Disable unicode(Perfomance).
 LC_ALL=C
@@ -19,19 +20,8 @@ LANG=C
 # Colors
 color_selected='\e[32m'
 color_playing='\e[33m'
-color_barbg=3
-color_progressbar=4
-
-
-# COL0='\e[0;30m'
-# COL1='\e[0;31m'
-# COL2='\e[0;32m'
-# COL3='\e[0;33m'
-# COL4='\e[0;34m'
-# COL5='\e[0;35m'
-# COL6='\e[0;36m'
-# COL7='\e[0;37m'
-# COLR='\e[0m'
+color_barbg='\e[34m'
+color_progressbar='\e[35m'
 
 # version (YY.MM.DD)
 BEATS_VERSION=23.08.24
@@ -47,20 +37,17 @@ player_start_(){
 
 	# Get termwindow Geometry.
 	get_term_size_
+
+	# Non-Configurable Variables
+	play_status="STOPPED"
+	curr_playing_index=-1
 }
 
 # Must be executed on the player termination.
 player_exit_(){
-	# Kill Player
+	# Kill Player(background playing not implemented, because its a simple player!)
+	kill_ffplay_ "$player_pid"
 
-	## FixIt: change dontkillplayer to killplayer and reverse booleans realted.
-	[[ $dont_kill_player != true ]] && {
-		kill_beat_ "$player_pid"
-		update_data_ ST 'STOPPED'
-	}
-
-	## FixIt: look for a better solution for repeat keys
-	xset r rate 500		# Disable Repeat key rate
     	#printf '\e[2J'		# Clear screen.
 	printf '\e[?7h'		# Enables Line Wrap.
 	printf '\e[?25h'	# Restore cursor.
@@ -70,10 +57,15 @@ player_exit_(){
 	exit 0
 }
 
+short_(){
+	# FixIt: you know it!
+	echo
+}
+
 # Get Terminal Size(Lines x Columns).
 get_term_size_(){
 	shopt -s checkwinsize
-	(:;:)		# Sleep for micro secons.
+	(:;:)		# Sleep for micro seconds.
 }
 
 # Get Beats name.
@@ -82,111 +74,34 @@ get_beats_name_(){
 	unset Beat_Name		# Array which stores beats name.
 
 	for i in "${!playlist[@]}"; do
-		for Index in "${playlist[$i]}"*; do
-			case "$Index" in
-				# Store beats hvaing following formats.
-				*'.mp3' | *'.mp4' | *'.m4a' | *'.acc' |\
-				*'.wma' | *'.ogg' | *'.wav' | *'.ogg' |\
-				*'.opus' | *'.flac' | *'aiff' )		Beat_Name+=("$Index") ;;
-			esac
-		done
-	done
-
-	# Show message if no beat found.
-	if (( ${#Beat_Name[@]} == 0 )); then
-		status_bar_ "No Beats found."
-		bsleep_ 1
-	fi
-
-	# Beats are not searched.
-	searched=false
-}
-
-# Search for beats with matching string.
-find_beats_(){
-	# $1 = String to searched.
-
-	# Re-initialize the Beats data.
-	[[ "$searched" == 'true' ]] && get_beats_name_
-
-	# Reset session specific variables.
-	selected_index=
-
-	# Uppercase or Lowercase both side to enable fuzzyfinding.
-	case "$screen" in
-		'MAIN')
-			local List
-			for Index in "${!Beat_Name[@]}"; do
-				if [[ "${Beat_Name[$Index]^^}" == *"${1^^}"* ]]; then
-					List+=("${Beat_Name[$Index]}")
-				fi
-			done
-			unset Beat_Name
-			Beat_Name=("${List[@]}")
-			;;
-		'QUEUE')
-			local List
-			for Index in "${!Queue_Name[@]}"; do
-				if [[ "${Queue_Name[$Index]^^}" == *"${1^^}"* ]]; then
-					List+=("${Queue_Name[$Index]}")
-				fi
-			done
-			unset Queue_Name
-			Queue_Name=("${List[@]}")
-			;;
-	esac
-
-	# Show message if no beat found.
-	if (( ${#Beat_Name[@]} == 0 )); then
-		status_bar_ "No Beats found."
-		bsleep_ 1
-	fi
-
-	# Beats are Search with a sequence.
-	searched=true
-}
-
-arguments_(){
-	# Argument Handler
-	local TotArg=$#
-	for ((;i++<$TotArg;)); do
-		case "$1" in
-			# Check if user need help.
-			'-h'|'--help')
-				echo "Can't help right now."
-				exit 0
-				;;
-			'-v'|'--version')
-				printf '%s\n' "$Version"
-				exit 0
-				;;
-			*)
-				# Play beat directly if specified and existed.
-				if [[ -f "$1" ]]; then
-					## direct play
-					echo "not done yet"
-					exit
-
-				# Specify the directory where to search for beats.
-				elif [[ -d "$1" ]]; then
-					# Replace ~ with $HOME.
-					BEATS_DIR="${1//\~/$HOME}"
-					# Add / if not already given.
-					[[ "$BEATS_DIR" != *'/' ]] && BEATS_DIR="$BEATS_DIR"'/'
-				else
-					printf 'beats: error: Unknown option or file: %s\n' "$1" 1>&2
-					exit 2
-				fi
+	for Index in "${playlist[$i]}"*; do
+		case "$Index" in
+			# Store beats hvaing following formats.
+			*'.mp3' | *'.mp4' |\
+			*'.m4a' | *'.acc' |\
+			*'.wma' | *'.ogg' |\
+			*'.wav' | *'.ogg' |\
+			*'.opus' | *'.flac' |\
+			*'aiff' )
+				# Checks if file is realy music file
+				case "$(file -b --mime-type "$Index")" in
+					'video/mp4' | 'audio/mpeg')	Beat_Name+=("$Index") ;;
+				esac
 		esac
-		shift
 	done
+	done
+
+	(( ${#Beat_Name} == 0 )) && {
+		# FixIt: Remove following line
+		echo -e "No beats found in any playlist"
+		exit
+	}
 }
 
-input_handler_(){
-	unset input
+input_parser_(){
+	# Reads input and exit if idel for sometime
 
-	# Read input(exit function if idel for sometime).
-
+	local input
 	# Read one Normal or special key.
 	read $1 -rs -N 1 input
 
@@ -202,64 +117,51 @@ input_handler_(){
 	case "$input" in
 
 		# Special Keys
-		$'\n')	printf 'ENTER'	;;
-
-		' ')	printf 'SPACE'	;;
-
-		# !Tab must remain below space and enter
-		$'\t'|[[:blank:]])
-			printf 'TAB'	;;
-
-		$'\177'|$'\b')
-			printf 'BACKSPC';;
-
-		'\E'|'\e')
-			printf 'ESCAPE'	;;
+		$'\n')			printf 'ENTER'	;;
+		' ')			printf 'SPACE'	;;
+		$'\t')			printf 'TAB'	;;
+		$'\177'|$'\b')		printf 'BACKSPC';;
+		'\E'|'\e')		printf 'ESCAPE'	;;
 
 		# Arrow Keys
-		'\e[A'|'k'|'\eOA')
-			printf 'UP'	;;
-		'\e[B'|'j'|'\eOB')
-			printf 'DOWN'	;;
-		'\e[D'|'h'|'\eOC')
-			printf 'LEFT'	;;
-		'\e[C'|'l'|'\eOC')
-			printf 'RIGHT'	;;
+		'\e[A'|'k'|'\eOA')	printf 'UP'	;;
+		'\e[B'|'j'|'\eOB')	printf 'DOWN'	;;
+		'\e[D'|'h'|'\eOC')	printf 'LEFT'	;;
+		'\e[C'|'l'|'\eOC')	printf 'RIGHT'	;;
 
 		# Remaining keys
-		*)	echo -n "$input";;
+		*)			echo -n "$input";;
 	esac
 }
 
 # Kill current playing beat.
-kill_beat_(){
-	player_pid="${1:-"$player_pid"}"
-
+kill_ffplay_(){
+	player_pid="${1:-"$player_pid"}"	# Just in case if not arg is given
 	kill "$player_pid" 2>/dev/null
-	update_data_ ST 'STOPPED'
+	unset $player_pid
+	play_status='STOPPED'
 }
 
 # List available beats.
 list_beats_(){
-	# $1 - Number of beats to show
+	# $1 - Number of beats to show on screen
 	[[ $1 ]] && ListEnd=$((ListStart + $1)) || ListEnd=$((ListStart+LINES))
 
-	# List limited beats that can fit on screen.
+	# Loop through only the number of beats we want to show
 	for (( i=$ListStart;i<$ListEnd;i++ )); do
-		# If exceed the limit then display empty line.
-		if (( $i < 0 || $i > $((Total-1)) )); then
-			local Temp=""
-		else
+		if ! (( $i < 0 || $i > $((Total-1)) )); then
 			local Temp="${Beat_Name[$i]%.*}"
 			Temp="${Temp##*/}"
+		else
+			Temp=
 		fi
 
 		# Colour selected_index.
-		if [[ $selected_index -eq $i ]]; then
+		if (( $selected_index == $i )); then
 			echo -en "$color_selected${Temp^^}\e[0m\e[K\n"
 
 		# Colour currently_playing.
-		elif [[ $currently_playing_index -eq $i ]]; then
+		elif (( $curr_playing_index == $i )); then
 			echo -en "$color_playing${Temp}\e[0m\e[K\n"
 
 		# Remaining beats.
@@ -271,20 +173,18 @@ list_beats_(){
 
 # Initialize the player.
 initialize_(){
-
 	# Duration of current playing beat
-	# Using $(<) is problematic here
-	curr_duration="$(cat "$DATA_FILE2" 2>/dev/null)"
+	if [[ "${play_status^^}" == 'PAUSED' ]]; then
+		curr_duration=$curr_duration
+	else
+		curr_duration="$(cat "$DATA_FILE2" 2>/dev/null)"
+	fi
 
-	# Initialize after a beat is completely played.
+	# Check if a Mode(Shuffle, Repeat, ...) can be applied
 	if (( $curr_duration == -1 && ${#Queue_Name[@]} != 0 )); then
 		play_status='STOPPED'
-
-		# Update curr_duration in data file.
 		curr_duration=0
-		update_data_ CD 0
 
-		# Apply play_modes, when a beat is completely played.
 		case "${play_mode^^}" in
 
 			# Shuffle one after another.
@@ -293,53 +193,19 @@ initialize_(){
 
 			# Repeat a particular beat.
 			'REPEAT')
-				case "${mode_sequence^^}" in
-					'REVERSED')
-						queue_index=$((queue_index-1))
-						if (( $queue_index == 0 )); then
-							queue_index=0
-							curr_duration=0
-							update_data_ CD 0
-						fi
-						;;
-					# FORWARD
-					*)
-						queue_index=$((queue_index+1))
-						if (( $queue_index -ge $((Total-1)) )); then
-							queue_index=$((Total-1))
-							# When Whole Queue Finishes then stop
-							# entering the above if statement.
-							curr_duration=0
-							update_data_ CD 0
-						fi
-						;;
-				esac
-				update_data_ QI "$queue_index"
-
+				queue_index=$((queue_index+1))
+				if (( $queue_index -ge $((Total-1)) )); then
+					queue_index=$((Total-1))
+					curr_duration=0
+				fi
 				ffplay_play_ "${Queue_Name[$queue_index]}"
-				;;
-
-			# Randomly play any beat.
-			'RANDOM')
-					local Temp=$((RANDOM%10))
-					## WIP
-					ffplay_play_ "${Beat_Name[$Temp]}"
 				;;
 		esac
 	fi
 
-	# Set total duration equal to current duration, if any error occurs.
-	total_duration=${total_duration:-$curr_duration}
-
-	# Persent of beat played.
+	## Persentage of beat played.
 	#PlayPercentage="$(bc -l <<< "($curr_duration/$total_duration)*100" 2>/dev/null)"
 	#PlayPercentage=${PlayPercentage%%.*}'%'
-
-	# Source data files when needed.
-	[[ "${source_data:-false}" == 'true' ]] && {
-		source_data_
-		source_data=false
-	}
 }
 
 setup_tui_(){
@@ -352,11 +218,6 @@ setup_tui_(){
 			Total="${#Beat_Name[@]}"
 			;;
 	esac
-
-	# Space(LINES) taken by other modules.
-	# 1 for space taken by Progress Bar.
-	# 1 for space taken by Status Bar.
-	#ReservedLines=1
 
 	# Select the middle of the total beats.
 	if [[ -z "$selected_index" ]]; then
@@ -378,36 +239,26 @@ select_(){
 	if (( $selected_index < 0 )); then
 		selected_index=0
 	elif (( $selected_index > $((Total-1)) )); then
-		# Case, in which Total no. of beats are zero.
-		if (( $Total == 0 )); then
-			selected_index=0
-		else
-			selected_index="$((Total-1))"
-		fi
+		selected_index="$((Total-1))"
 	fi
 }
 
 # Initialize ListStart and LinstEnd variables based on current selection.
-# In such a way that selected beat will remain at the center.
+# This function is made to keep selected beat in center of the list.
 initialize_listSE_(){
-	# Set selected_index if given by argument.
 	select_ "${1:-"$selected_index"}"
 
-	case "$((LINES%2))" in
+	case "$((LINES%2))" in	# If even or odd
 		'0')	local Temp=$(( LINES/2 ))	;; # For even number.
 		* )	local Temp=$(( (LINES/2) + 1 ))	;; # For odd number.
 	esac
 
-	# (selected_index+1) : We need the index of selected_index beat(1 to N)
+	# (selected_index+1): We need the index of selected_index beat(1 to N)
 	# rathen than the index of the selected array(0 to N-1).
 	ListStart=$(( (selected_index+1) - (Temp) ))
-	#ListEnd=$(( (selected_index+1) + (LINES-Temp) - ReservedLines ))
 }
 
 status_bar_(){
-	# Set position.
-	#(( $# > 0 )) && printf '\e[m\e[%s;0H\e[K' "$1" || printf '\e[m\e[%s;0H\e[K' "$LINES"
-
 	# Show custom text.
 	if (( $# >= 1 )); then
 		printf '\r\e[42m%*s' "$COLUMNS"
@@ -417,99 +268,59 @@ status_bar_(){
 	else
 		# Draw colored bar
 		printf '\e[42m%*s\r\e[30m' "$COLUMNS"
-		# Right (must remain above Left)
+
+		# Align right
 		printf "%${COLUMNS}s" "$((total_duration/60))/$((curr_duration/60))s "
-		# Left
+
+		# Align left
 		Temp=${currently_playing##*/}
 		printf "\r%s\e[m" " ${Temp%.*} | $play_status | $play_mode"
 	fi
 }
 
-# Show players status.
-# status_bar_(){
-# 	# Set position.
-# 	(( $# > 0 )) && printf '\e[m\e[%s;0H\e[K' "$1" || printf '\e[m\e[%s;0H\e[K' "$LINES"
-#
-# 	# Show custom text.
-# 	if (( $# > 1 )); then
-# 		echo -en "$2\e[m"
-#
-# 	# Default status.
-# 	else
-# 		# Draw colored bar
-# 		printf '\e[42m%*s\r' "$COLUMNS"
-#
-# 		# Text color
-# 		printf '\e[30m'
-# 		echo -n "$selected_index/$Total (${total_duration}/${curr_duration})ms $play_status $play_mode ${queue_index}QI ${currently_playing_index}LP"
-# 		echo -en "\e[m"
-# 	fi
-# }
-
 # Shows the Progress of currently playing beat.
 progress_bar_(){
 	PlayProgress="$(bc -l <<<"$curr_duration/( $total_duration/$COLUMNS )" 2>/dev/null)"
-	PlayProgress=${PlayProgress%%.*}
+	PlayProgress=$(printf '%.0f' "$PlayProgress")
 
 	local Temp='\e[K\e[1;31m'	# Color Bar
-	for (( i=0; i++<${PlayProgress:-0}; )); do	Temp+="─";	done; Temp+='\e[0m'
+	for (( i=0; i++<${PlayProgress:-"0"}; )); do	Temp+="─";	done; Temp+='\e[0m'
 	for (( ;i++<=$COLUMNS; )); do			Temp+="─";	done
 	printf '%s\n' "$(echo -en "$Temp")"
 }
 
 # Play given beat.
 ffplay_play_(){
-
 	# Kill Previously playing beat, if any.
-	kill_beat_ "$player_pid"
+	[[ ! -z $player_pid ]] && kill_ffplay_
 
-	# If file is not a music file, Don't do anything.
+	# Play the beat and parse the output(continue in background).
+	ffplay -nodisp -autoexit -loglevel info -hide_banner $2 "$1" 2>&1 | ffplay_parse_ &
 
-	# FixIt: Make this check run while scaning/searching for music
-	case "$(file -b --mime-type "$1")" in
-		'video/mp4' | 'audio/mpeg')
+	# Get PID of ffplay.
+	player_pid="$!"
+	play_status='PLAYING'
+	currently_playing="$1"
 
-			# Play the beat and parse the output(continue in background).
-			ffplay -nodisp -autoexit -loglevel info -hide_banner $2 "$1" 2>&1 | ffplay_parse_ &
+	# Pause until Done signal is sent from ffplay_parse_ function.
+	[[ "$(< "$DATA_FILE4")" == 'Done' ]]
+	source $DATA_FILE
 
-			# Get PID of new ffplay.
-			player_pid="$!"
-
-			# Pause until Done signal is sent from ffplay_parse_ function.
-			[[ "$(< "$DATA_FILE4")" == 'Done' ]]
-
-			update_data_ PI "$(echo "$player_pid")"
-
-			# Update currently_playing
-			update_data_ LP "$1"
-
-			# Update currently_playing_index
-			get_lastplayed_index_
-			update_data_ LI "$currently_playing_index"
-
-			# update Status
-			update_data_ ST "PLAYING"
-			;;
-		*)
-			if [[ -e "$1" ]]; then
-				status_bar_ "$LINES" "Not a Music file, or is it?"
-			else
-				status_bar_ "$LINES" "Beat don't exist anymore."
-			fi
-
-			sleep 0.5
-			;;
-	esac
+	# Update curr_playing_index
+	# FixIt: fix the name!
+	# Remove it hardcode it into other functions(like directly assign variable when enter is pressed)
+	find_indexof_beat_
 }
 
 ffplay_parse_(){
-	# Once-time parse.
-
+	# Need to reset curr_duration as soon as possible for, but why?
+	#echo -en "1" > "$DATA_FILE2"
+	# One-time parse.
 	local LINES Words
 	while read -s LINES; do
 		Words=($LINES)
 
-		# Get beats playing duration.
+		# Get beats duration.
 		if [[ "${Words[0]}" == "Duration:" ]]; then
 			IFS=: read -a Duration <<< "${Words[1]//,/}"
 		elif [[ "${Words[0]}" == "Stream" ]]; then
@@ -520,14 +331,14 @@ ffplay_parse_(){
 	# If last Word don't match that means there is an error in playing.
 	[[ "${Words[0]}" == 'Stream' ]] && {
 		# Update Duration data.
-		update_data_ DH "${Duration[0]}"	# Duration Hour.
-		update_data_ DM "${Duration[1]}"	# Duration Minute.
-		update_data_ DS "${Duration[2]%%.*}"	# Duration Second.
-		update_data_ DO "${Duration[2]##*.}"	# Duration MilliSecond.
-		update_data_ TD "$((	(${Duration[0]} * 316000) + \
-					(${Duration[1]} * 3600  ) + \
-					(${Duration[2]%%.*} * 60) + \
-					(${Duration[2]##*.}     ) )) "	# Total Duration in MilliSecond.
+		echo "total_dur_h=${Duration[0]}" >$DATA_FILE	# Duration Hour.
+		echo "total_dur_m=${Duration[1]}" >$DATA_FILE	# Duration Minute.
+		echo "total_dur_s=${Duration[2]%%.*}" >$DATA_FILE	# Duration Second.
+		echo "total_dur_ms=${Duration[2]##*.}" >$DATA_FILE	# Duration MilliSecond.
+		echo "total_duration=$(( (${Duration[0]} * 316000) + \
+			  (${Duration[1]} * 3600  ) + \
+			  (${Duration[2]%%.*} * 60) + \
+			  (${Duration[2]##*.}     ) ))" >/$DATA_FILE	# Total Duration in MilliSecond.
 	}
 
 	# Continue player(send signal to ffplay_play_ function).
@@ -538,142 +349,29 @@ ffplay_parse_(){
 		[[ "${Index%%.*}" == [0-9]* ]] && break
 	done
 
-	# Loop Parse(Loop until Music is Stops/Ends).
+	# Loop to parse current duration until Music is stops
 	local Durr
 	while read -r -d $'\r' Index; do
 		Durr="${Index%% *}"
 		echo -en "$(bc <<< "(${Durr%%.*} * 60) + ${Durr##*.}" )" > "$DATA_FILE2" # Convert into MilliScond.
 	done
 
-	echo -en "-1" > "$DATA_FILE2"	# When done playing.
-}
-
-# Handle fuctions related to data.
-reset_data_(){
-	# Reset data file(empty).
-	# Reset 1nd data file.
-	printf '' >$DATA_FILE
-
-	# Reset 2nd data file.
-	printf '' >$DATA_FILE2
-	# unset curr_duration total_duration 2>/dev/null
-	# unset duration_hour duration_minutes duration_seconds 2>/dev/null
-	# Don't unset player_pid and currently_playing as, they are
-	# needed for misc tasks(kill ffplay) and for next start.
+	echo -en "-1" > "$DATA_FILE2"	# -1 indicates that music ends
 }
 
 create_data_(){
-	# Creates data file.
-	# Contains variables state.
-	DATA_FILE="/tmp/Beats-$BEATS_VERSION/beats.data"
+	local Temp="/tmp/Beats-$BEATS_VERSION"
+	mkdir -p "$Temp"
 
-	# Contains current duration.
-	DATA_FILE2="/tmp/Beats-$BEATS_VERSION/currdur"
+	DATA_FILE="$Temp/beatsdata"	# Contains variables state.
+	DATA_FILE2="$Temp/currdur"	# Contains current duration.
+	DATA_FILE3="$Temp/queuelist"	# Contains Queue list in sequence.
+	DATA_FILE4="$Temp/msgfifo"	# FIFO file to communicate b/w parallel running functions.
 
-	# Contains Queue list in sequence.
-	DATA_FILE3="/tmp/Beats-$BEATS_VERSION/queuelist"
-
-	# FIFO file to communicate b/w parallel running functions.
-	DATA_FILE4="/tmp/Beats-$BEATS_VERSION/msgfifo"
-
-
-	mkdir -p "${DATA_FILE%/*}"  \
-		 "${DATA_FILE2%/*}" \
-		 "${DATA_FILE4%/*}" \
-		 "${DATA_FILE3%/*}"
-
-	touch "$DATA_FILE"  \
-	      "$DATA_FILE2" \
-	      "$DATA_FILE3"
-
+	touch "$DATA_FILE" "$DATA_FILE2" "$DATA_FILE3"
 	mkfifo "$DATA_FILE4" 2>/dev/null
 
-	[[ "$(< "$DATA_FILE")" == "" ]] && {
-		echo -e "currently_playing="		> "$DATA_FILE"
-		echo -e "currently_playing_index="	>>"$DATA_FILE"
-		echo -e "player_pid="		>>"$DATA_FILE"
-		echo -e "play_status=STOPPED"	>>"$DATA_FILE"
-		echo -e "duration_hour=0"	>>"$DATA_FILE"
-		echo -e "duration_minutes=0"	>>"$DATA_FILE"
-		echo -e "duration_seconds=0"	>>"$DATA_FILE"
-		echo -e "total_duration=0"	>>"$DATA_FILE"
-		echo -e "queue_index=0"		>>"$DATA_FILE"
-	}
-
-	[[ "$(< "$DATA_FILE2")" == "" ]] && {
-		# curr_duration
-		echo "0" 		> "$DATA_FILE2"
-	}
-}
-
-# Source data files.
-source_data_(){
-	# Source DATA_FILE
-	for (( i=0; i++<20; )); do
-		[[ "$(< "$DATA_FILE")" == "" ]] && {
-			continue
-			sleep 0.05
-		}
-		source "$DATA_FILE"
-		break
-	done
-
-	# Source current duration
-	for (( i=0; i++<20; )); do
-		curr_duration="$(< $DATA_FILE2)"
-		[[ "$curr_duration" == "" ]] && {
-			continue
-			sleep 0.05
-		}
-		break
-	done
-
-	# Source queue list.
-	unset line i
-	while IFS= read -sr line; do
-		Queue_Name[$i]="$line"
-		((i++))
-	done < "$DATA_FILE3"
-}
-
-update_data_(){
-	case "$1" in
-		# CD = Current Duration
-		'CD')
-			echo "${2:-0}" > "$DATA_FILE2"
-			;;
-
-		# QU = Queue List
-		'QU')
-			printf '' > "$DATA_FILE3"
-			printf '%s\n' "${Queue_Name[@]}" >> "${DATA_FILE3}"
-			# Print queue list line by line in sequence.
-			#for i in "${!Queue_Name[@]}"; do
-			#	echo "${Queue_Name[$i]}" >> "$DATA_FILE3"
-			#	#echo "${Queue_Name[$i]}"
-			#done
-		;;
-
-		# Remaining.
-		*)
-			case "$1" in
-			esac
-
-			echo "$Temp" > "$DATA_FILE"
-
-			# Source the modified data
-			source_data_
-	esac
-}
-save_on_exit_(){
-	# LP = currently_playing
-echo "currently_playing=\"${2}\"
-\ player_pid=\"${2}\"
-queue_index=${2:-'0'}" > "$DATA_FILE"
-}
-
-short_(){
-	echo
+	printf '0' > "$DATA_FILE2"	# Reset CurrDuration.
 }
 
 # Create a queue list
@@ -729,17 +427,16 @@ refresh_(){
 }
 
 # Fetch array-index of last played beat.
-get_lastplayed_index_(){
+find_indexof_beat_(){
 	for (( i=0; i<$Total;i++ )); do
 		if [[ "${Beat_Name[$i]}" == "${currently_playing}" ]]; then
-			currently_playing_index="$i"
+			curr_playing_index="$i"
 			break
 		fi
 	done
 
 	# If not found.
-	currently_playing_index=${currently_playing_index:-'0'}
-	update_data_ LI "$currently_playing_index"
+	curr_playing_index=${curr_playing_index:-'0'}
 }
 
 main_screen_(){
@@ -753,37 +450,21 @@ main_screen_(){
 	# Dont change its position (last module must be not produce newline)
 	status_bar_
 
-	local input="$(input_handler_ '-t 0.9')"
+	local input="$(input_parser_ '-t 0.9')"
 	case "$input" in
 
 		# Play selected beat.
 		'ENTER')
-			case "${play_status^^}" in
-				'PLAYING')
-					ffplay_play_ "${Beat_Name[$selected_index]}"
-				;;
-
-				'PAUSED') ffplay_play_ "${Beat_Name[$selected_index]}"
-				;;
-
-				'STOPPED')
-					ffplay_play_ "${Beat_Name[$selected_index]}"
-				;;
-			esac
-
-			# Set queue index.
-			queue_index="$selected_index"
-			update_data_ QI "$queue_index"
-			update_data_ QU "$queue_index"
-
-			currently_playing_index=$selected_index
+			ffplay_play_ "${Beat_Name[$selected_index]}"
+			queue_index="$selected_index"	# Set queue index
+			curr_playing_index=$selected_index
 			;;
 
-		# Pause/resume beat.
+		# Pause/resume beat
 		'SPACE')
 			case "${play_status^^}" in
 				'PLAYING')
-					kill $player_pid 2>/dev/null
+					kill_ffplay_ $player_pid 2>/dev/null
 					play_status='PAUSED'
 					;;
 
@@ -792,14 +473,19 @@ main_screen_(){
 					;;
 
 				'STOPPED')
-					if (( $curr_duration == 0 )); then
-						ffplay_play_ "${Beat_Name[$selected_index]}"
-						queue_index="$selected_index"
-						update_data_ QI "$queue_index"
-						currently_playing_index=$selected_index
-					else
-						ffplay_play_ "$currently_playing" "-ss $((curr_duration/60))"
-					fi
+					case "$curr_duration" in
+						'0'|'-1')
+							ffplay_play_ "${Beat_Name[$selected_index]}"
+							queue_index="$selected_index"
+							curr_playing_index=$selected_index
+							# This Fixes the conflict with initialize_ function. When song ends(currdur=-1) and when we press
+							# SPACE again it starts the initialize_ function right after ffplay_ and set play_status=STOPPED
+							echo 0 >"$DATA_FILE2"
+							;;
+						*)
+							ffplay_play_ "$currently_playing" "-ss $((curr_duration/60))"
+							;;
+					esac
 					;;
 			esac
 
@@ -816,15 +502,15 @@ main_screen_(){
 			;;
 
 		'LEFT')
-			currently_playing_index=$((--currently_playing_index))
-			(( $currently_playing_index < 0 )) && currently_playing_index=0
-			ffplay_play_ "${Beat_Name[$currently_playing_index]}"
+			curr_playing_index=$((--curr_playing_index))
+			(( $curr_playing_index < 0 )) && curr_playing_index=0
+			ffplay_play_ "${Beat_Name[$curr_playing_index]}"
 			;;
 
 		'RIGHT')
-			currently_playing_index=$((++currently_playing_index))
-			(( $currently_playing_index > $((Total-1)) )) && currently_playing_index=$((Total-1))
-			ffplay_play_ "${Beat_Name[$currently_playing_index]}"
+			curr_playing_index=$((++curr_playing_index))
+			(( $curr_playing_index > $((Total-1)) )) && curr_playing_index=$((Total-1))
+			ffplay_play_ "${Beat_Name[$curr_playing_index]}"
 			;;
 
 		# Queue Screen.
@@ -835,49 +521,26 @@ main_screen_(){
 			;;
 
 		# Add selected song to Queue.
-		'c')
-			add_queue_ "$selected_index"
-			;;
-
-		# Remove selected song from Queue.
-		'd')
-			## FixIt: make the delection function do reverse check
-			# because the newely added song will be at the last
-			remove_queue_ "$selected_index"
-			;;
+		'c')	add_queue_ "$selected_index"	;;
 
 		# Run commands.
 		":")
-			local output input
-
 			while :; do
 				status_bar_ ":$output"
-				read -t 1 -rs -N 1 input
+				read -rs -N 1 input
 				case "$input" in
-
-					# Enter.
-					$'\n')	break				;;
-
-					# Escape.
-					$'\e')	output= ; break			;;
-
-					# Backspace
-					$'\177'|$'\b')	output="${output%?}"	;;
-
-					# remaing non-special char
+					$'\n')		break			;;
+					$'\e')		output= ; break		;;	# exit.
+					$'\177'|$'\b')	output="${output%?}"	;;	# Backspace
 					[[:print:]])	output="$output$input"	;;
 				esac
 			done
 
-
-			# Jump
-			if [[ "$output" =~ ^[0-9]+$ ]]; then
-				initialize_listSE_ "$((output-1))"
-
-			# Remaining commands
-			else
-				common_commands_ "$output"
-			fi
+			case "$output" in
+				'wq'|'wq!'|'q'|'q!'|'quit'|'quitall')	exit	;;
+			esac
+			[[ "$output" =~ ^[0-9]+$ ]] && initialize_listSE_ "$((output-1))"
+			unset output input
 			;;
 
 		# Go to Previous Screen
@@ -890,9 +553,58 @@ main_screen_(){
 			fi
 			;;
 
-		# Remaining commands
-		*)
-			common_commands_ "$input"
+		# Seek Backward.
+		'[')
+			curr_duration="$((curr_duration - seek_interval))"
+			# Dont let curr_duration go below 0.
+			if (( $curr_duration < 0 )); then
+				curr_duration="0"
+			fi
+			printf "$curr_duration" >"$DATA_FILE2"
+
+			[[ "${play_status^^}" == 'PLAYING' ]] && ffplay_play_ "$currently_playing" "-ss $((curr_duration/60))"
+			;;
+
+		# Seek Forward
+		']')
+			curr_duration="$((curr_duration+seek_interval))"
+			# Dont let curr_duration go above total_duration.
+			if (( $curr_duration > ${total_duration:=0} )); then
+				curr_duration="$total_duration"
+			fi
+			printf "$curr_duration" >"$DATA_FILE2"
+
+			[[ "${play_status^^}" == 'PLAYING' ]] && ffplay_play_ "$currently_playing" "-ss $((curr_duration/60))"
+			;;
+
+		# Exit
+		'q')	exit		;;
+
+		# Refresh
+		'r')	refresh_	;;
+
+		# Stops Music
+		'x')	kill_beat_	;;
+
+		# Go to Top
+		'g')	initialize_listSE_ "0" ;;
+
+		# Go to Bottom
+		'G')	initialize_listSE_ "$((Total-1))" ;;
+
+		# Search from listed beats
+		"/")
+			while :; do
+				status_bar_ "$LINES" "/$output"
+				read -t 1 -rs -N 1 input
+				case "$input" in
+					$'\n'|$'\e')	output= ; break		;;	# Quit
+					$'\177'|$'\b')	output="${output%?}"	;;	# Backspace
+					[[:print:]])	output="$output$input"	;;
+				esac
+			done
+			[[ ! -z "$output" ]] && { find_beats_ "$output"; setup_tui_; }
+			unset output input
 			;;
 	esac
 }
@@ -923,226 +635,19 @@ list_queue_beats_(){
 	done
 }
 
-common_commands_(){
-	case "$1" in
-		'[' | ']')
-			xset r rate 1		# Disable Repeat key rate
-	esac
-	case "$1" in
+configurations_(){
+	# Seeking interval in milliseconds
+	seek_interval=300
 
-		# Seek Backward.
-		'[')
-			if [[ "${play_status^^}" == 'PLAYING' ]]; then
-				kill_beat_ "$player_pid"
-				play_status='PLAYING'
-			fi
-			while :; do
-				curr_duration="$((curr_duration - seek_interval))"
-				progress_bar_	"$((LINES-1))"
-				read -t 0.1 -d'[' 2>/dev/null || break
-			done
+	# Values: Shuffle, LoopShuffle, Repeat, Repeatone, Randomise, None
+	play_mode=${play_mode:-"SHUFFLE"}
 
-			# Dont let curr_duration go below 0.
-			if (( $curr_duration < 0 )); then
-				update_data_ CD  "0"
-				curr_duration="0"
-			else
-				update_data_ CD "$curr_duration"	# Convert into Seconds.
-			fi
-
-			# Continue Playing if already playing.
-			[[ "${play_status^^}" == 'PLAYING' ]] && ffplay_play_ "$currently_playing" "-ss $((curr_duration/60))"
-			;;
-
-		# Seek Forward.
-		']')
-			# Kill if already playing
-			if [[ "${play_status^^}" == 'PLAYING' ]]; then
-				kill_beat_ "$player_pid"
-				play_status='PLAYING'
-			fi
-			while :; do
-				curr_duration="$((curr_duration + seek_interval))"
-				progress_bar_	"$((LINES-1))"
-				read -t 0.1 -d']' 2>/dev/null || break
-			done
-
-			# Dont let curr_duration go above total_duration.
-			if (( $curr_duration > $total_duration )); then
-				update_data_ CD "$total_duration"
-				curr_duration="$total_duration"
-			else
-				update_data_ CD "$curr_duration" # Convert into Seconds.
-			fi
-
-			# Continue Playing if already playing.
-			[[ "${play_status^^}" == 'PLAYING' ]] && ffplay_play_ "$currently_playing" "-ss $((curr_duration/60))"
-			;;
-
-		# Exit (dont Stop Music).
-		'q')
-			exit
-			;;
-
-		# Exit and Stop Music.
-		'Q')
-			dont_kill_player=true
-			exit
-			;;
-
-		# Refresh.
-		'r')
-			refresh_
-			;;
-
-		# Stops Music.
-		'x')
-			kill_beat_
-			;;
-
-		# Go to Top.
-		'g')
-			initialize_listSE_ "0"
-			;;
-
-		# Go to Bottom.
-		'G')
-			initialize_listSE_ "$((Total-1))"
-			;;
-
-
-		# Search from listed beats.
-		"/")
-			unset output input
-
-			while :; do
-				status_bar_ "$LINES" "/$output"
-				read -t 1 -rs -N 1 input
-				case "$input" in
-
-					# Enter.
-					$'\n')	break				;;
-
-					# Escape.
-					$'\e')	output= ;break			;;
-
-					# Backspace
-					$'\177'|$'\b')	output="${output%?}"	;;
-
-					# remaing non-special char
-					[[:print:]])	output="$output$input"	;;
-				esac
-			done
-
-			[[ -z "$output" ]] || { find_beats_ "$output"; setup_tui_; }
-			;;
-	esac
-
-	xset r rate 500		# Reset
-}
-
-queue_screen_(){
-	initialize_
-	clear
-
-	# Reset cursor to the top left edge.
-	printf '\e[0;0H'
-
-	# Modeules	Position	Extra
-	list_queue_beats_ "$((LINES-1))"
-	status_bar_ "QUEUE LIST"
-	# status_bar_ "a: Add duplicate | SPACE: select/unselect | d: Remove selected"
-
-	# Act on user input.
-	local input=$(input_handler_ '-t 0.9')
-	case "$input" in
-
-		# Select/unselect beat.
-		'SPACE')
-			if [[ -z "$queue_selected" ]]; then
-				queue_selected=$selected_index
-			else
-				update_data_ QU
-				queue_selected=
-			fi
-			;;
-
-		# Move selection up.
-		'UP')
-			[[ -z $queue_selected ]] || {
-				(( $queue_selected <= 0 )) && Temp=0 || Temp=$((queue_selected-1))
-				queue_swap_ "$queue_selected" "$Temp"
-				((queue_selected--))
-				(( $queue_selected <= 0 )) && queue_selected=0
-			}
-			initialize_listSE_ "$((selected_index-1))"
-		       	;;
-
-		# Move selection down.
-		'DOWN')
-			[[ -z $queue_selected ]] || {
-				(( $queue_selected >= $((Total-1)) )) && Temp=$queue_selected || Temp=$((queue_selected+1))
-				queue_swap_ "$queue_selected" "$Temp"
-				((queue_selected++))
-				(( $queue_selected >= $((Total-1)) )) && queue_selected=$((Total-1))
-			}
-			initialize_listSE_ "$((selected_index+1))"
-			;;
-
-		# Queue Screen.
-		'1')
-			get_beats_name_
-			screen='MAIN'
-			;;
-
-		# Add duplicate of selected song in Queue.
-		'a')
-			queue_add_ "$selected_index"
-			update_data_ QU
-			setup_tui_
-			;;
-
-		# Remove selected song from Queue.
-		'd')
-			queue_remove_ "$selected_index"
-			update_data_ QU
-			setup_tui_
-			;;
-
-		# Go to Previous Screen
-		'ESCAPE')
-			if [[ "$searched" == 'true' ]]; then
-				source_data_
-				screen='QUEUE'
-				setup_tui_
-			else
-				get_beats_name_
-				screen='MAIN'
-				setup_tui_
-			fi
-		;;
-	esac
-}
-
-now_playing_screen_(){
-	echo
+	# Values: ON, OFF
+	repeat="OFF"
 }
 
 main_(){
-
-	## Predefined
-	# Track seeking length in milliseconds
-	seek_interval=300
-
-	# Available Playing Modes are:
-	# Shuffle, Repeat, Repeatall, Randomise, None
-	play_mode=${play_mode:-"SHUFFLE"}
-	repeat=${repeat:-OFF}
-
-	# Non Configurable
-	play_status=STOPPED
-	source_data=false	# Indicates, weather to source data file or not.
-
+	configurations_
 	player_start_
 
 	# FixIt:
@@ -1164,52 +669,23 @@ main_(){
 	trap 'player_exit_' EXIT	# Run once on termination(to reset the TUI).
 	trap 'refresh_' WINCH		# Run every time, there is change in term-window size.
 
-	create_data_	# Create data files.
-	source_data_	# Fetch data of previous session(player continue).
+	create_data_		# Create required files.
 
-	# Search for Beats in a given Directory.
-	get_beats_name_
+	get_beats_name_		# Search for Beats in a given Directory.
 	setup_tui_
 
-	# Find Index no. of lastely played beat.
-	# FixIt: Improve get_lastplayed_index function
-	# FixIt: make it take 2 arguments which beat to search and one more which
-	# diffentiate it from other songs with same name. Make it work such that
-	# even if the beat is renamed it can still find it.
-	# q	aaaaaaasdwe`ixIt: Rename get_lastplayed_index to find_indexof_beat
-	[[ -z "$currently_playing_index" ]] && get_lastplayed_index_
-
-	# Such that play_modes don't start on players start.
-	## FixIt
-	(( $curr_duration < 0 ||  $curr_duration > $total_duration )) && update_data_ CD 0
-
-	# Queuing Won't be required if playing mode is not one of these.
-	## if changing from none to other mode create queue_
-	[[ $play_mode =~ (SHUFFLE|REPEAT|RANDOMISE)* && -z "$(< "$DATA_FILE3")" ]] && {
-			create_queue_
-	}
+	# Create Queue list or use previous list
+	create_queue_
 
 	while :; do
 		case "${screen^^}" in
-
-			# Main Screen(Default)
-			'MAIN')		main_screen_	;;
-
-			# Queue screen
-			'QUEUE')	queue_screen_	;;
-
-			# Now playing screen
-			'NPLAYING')	now_playing_screen_;;
-
-			# Set to Defautl Screen.
-			*)	screen='MAIN'	;;
+			'MAIN')		main_screen_	;;	# Main Screen(Default)
+			'QUEUE')	queue_screen_	;;	# Queue screen
+			'NPLAYING')	now_playing_screen_;;	# Now playing screen
+			*)		screen='MAIN'	;;	# Set to Defautl Screen.
 		esac
 	done
 }
-
-
-# Arguments handler
-[[ $# -gt 0 ]] && arguments_ "$@"
 
 # Main function
 main_
