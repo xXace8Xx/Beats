@@ -1,0 +1,167 @@
+#!/bin/bash
+
+(( "$#" == 0 )) && {
+echo "usage
+ $0"
+exit 0
+}
+
+
+QUIET=0
+MOVIE="$1"
+NOW_STAMP="$MOVIE.stamp.txt"
+
+function ffprobe_parse {
+
+  VALID_STREAM=0
+
+  while read LINE
+  do
+     WORDS=($LINE)
+     CHECK=${WORDS[0]}
+     #  Duration: 00:00:06.55, start: 0.008333, bitrate: 1068 kb/s
+     if [ "$CHECK" = "Duration:" ] ; then
+
+
+        IFS=',' read -ra PARSE_TEMP <<< "${WORDS[1]}"
+        DURATION_HHMMSS="${PARSE_TEMP[0]}"
+
+
+        IFS=':' read -ra HMS <<< "${DURATION_HHMMSS}"
+        DURATION_HH="${HMS[0]}"
+        DURATION_MM="${HMS[1]}"
+        DURATION_SS="${HMS[2]}"
+
+        DURATION_SECONDS=$(echo "($DURATION_HH * 3600.0) + ($DURATION_MM * 60.0) + $DURATION_SS" | bc)
+
+        echo "$DURATION_SECONDS" > "$MOVIE.duration.txt"
+
+
+        if [ "${WORDS[2]}" = "start:" ] ; then
+
+            IFS=',' read -ra PARSE_TEMP <<< "${WORDS[3]}"
+            PLAY_START_SECONDS="${PARSE_TEMP[0]}"
+            DURATION_SECONDS_ADJUSTED=$(echo "($DURATION_SECONDS - $PLAY_START_SECONDS)" | bc)
+            if [ $QUIET -eq 0 ] ; then
+
+                echo "offset start seconds is $PLAY_START_SECONDS"
+
+                echo  "Total play duration is $DURATION_SECONDS_ADJUSTED seconds - $DURATION_HHMMSS minus $PLAY_START_SECONDS seconds"
+
+            fi
+        else
+            DURATION_SECONDS_ADJUSTED="$DURATION_SECONDS"
+            if [ $QUIET -eq 0 ] ; then
+                echo  "Total play duration is $DURATION_SECONDS_ADJUSTED seconds"
+            fi
+        fi 
+
+
+
+     #    Stream #0:0(und): Video: h264 (Main) (avc1 / 0x31637661), yuv420p(tv, smpte170m), 480x480, 1005 kb/s, 23.96 fps, 48.17 tbr, 600 tbn, 1200 tbc (default)
+     elif [ "$CHECK" = "Stream" ] ; then
+
+        VALID_STREAM=0
+        IFS=' ' read -ra PARSE_TEMP <<< "${LINE}"
+
+        for CHECK2 in "${PARSE_TEMP[@]}"; 
+        do
+
+            if [ "$CHECK2" = "Video:" ] ; then 
+                VALID_STREAM=1
+            else 
+                if [ "$CHECK2" = "Audio:" ] ; then 
+                    VALID_STREAM=0
+                else
+                    if [ "$CHECK2" = "fps," ] && [ $VALID_STREAM -eq 1 ] ; then 
+
+                        FPS="$FPS_TEMP"
+                        if [ $QUIET -eq 0 ] ; then
+                            echo "detected stream fps: $FPS"
+                        fi
+                        break
+
+                    fi
+                fi
+
+                FPS_TEMP="$CHECK2"
+            fi
+
+        done
+
+        if [ $VALID_STREAM -eq 1 ] ; then 
+
+            IFS= read -r -d $'\r' ignore 2> /dev/null
+            break;  
+
+        fi
+     fi
+
+
+   done
+
+}
+
+function ffplay_parse {
+
+
+  ffprobe_parse
+
+  if [ $QUIET -eq 0 ] ; then
+    echo "playing $DURATION_SECONDS seconds of video..."
+  fi
+
+  PERCENT_FUDGE=$(echo "$DURATION_SECONDS / 100" | bc -l)
+   while IFS= read -r -d $'\r' LINE
+    do
+      WORDS=($LINE)
+      STAMP=${WORDS[0]}
+      if [ "$STAMP" != "Seek" ] && [ "$STAMP" != "nan" ]  && [ "${WORDS[1]}" != "@" ] ; then
+
+
+         if [ $(echo "$STAMP <= 0.0" | bc) -eq 1 ] ; then
+            STAMP=0.0
+         elif [ $(echo "$STAMP >= $DURATION_SECONDS" | bc) -eq 1 ] ; then
+            STAMP="$DURATION_SECONDS"
+         fi
+
+         PERCENT=$(echo "($STAMP / $PERCENT_FUDGE)" | bc)
+         echo $STAMP > $NOW_STAMP
+
+        if [ $QUIET -eq 0 ] ; then
+            echo -n $'\r' "Playing $MOVIE @ seconds = $STAMP, $PERCENT% of duration"
+        fi
+      fi
+    done
+
+}
+
+
+ffplay -i "$MOVIE" -nodisp -autoexit -loglevel info -hide_banner -window_title "Playing"    3>&1 1>&2 2>&3 | ffplay_parse &
+
+MOVIE_PID=$!
+
+if [ $QUIET -eq 0 ] ; then
+    echo "
+    Started player for $MOVIE, PID is $MOVIE_PID
+
+    You can use:
+
+    kill -9 $MOVIE_PID
+
+    to kill player.
+
+    "
+
+fi
+
+echo $MOVIE_PID > "$MOVIE.pid.txt"
+
+if [ $QUIET -eq 0 ] ; then
+    wait $MOVIE_PID
+
+    echo ""
+    echo "Done"
+
+fi
+

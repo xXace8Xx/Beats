@@ -1,0 +1,19 @@
+#!/bin/bash
+
+play_p(){
+	while read Temp; do
+		Words=($Temp)
+		[[ ${Words[0]} == "Duration:" ]] && echo -e "${Words[1]}" 
+		[[ ${words[0]} ==  "Stream" ]] && break
+	done
+	while read -r -d $'\r' Temp; do
+		Word=($Temp)
+		echo -en "\r${Word[0]}"
+	done
+}
+
+play_(){
+	ffplay "$1" 3>&1 1>&2 2>&3 | play_p &
+}
+
+play_ "$@"

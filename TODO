@@ -1,0 +1,33 @@
+Main Page
+## Pages
+	-- Queue
+	-- Mini Player
+		Show Images
+		Show Next Queued songs
+
+## What we are aming for
+Simple
+FOSS
+useable(better than competitors)
+vim like
+fast
+few customisations
+	Statusbar staus
+	Progressbar icons
+	Icons for specific Indicators
+	Colors
+
+## Progressbar
+$Progressbar	-	$CurrDur/$TotDur
+## Status
+$Status|$MusicName	-	$Mode
+
+## Mode
+	Shuffel
+	Repeat Playlist
+	Repeat One
+
+## About
+Session only player, kill music if there is no window open
+Saves unquited: current duration
+Saves on quit: PlayingBeat, DurationPlayed
